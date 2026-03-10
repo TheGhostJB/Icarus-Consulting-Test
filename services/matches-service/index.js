@@ -31,7 +31,13 @@ app.get("/health", async (req, res) => {
 
 app.get("/", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM matches LIMIT 10");
+    const result = await pool.query(`
+      SELECT *
+      FROM match_view
+      ORDER BY start_time
+      LIMIT 10
+    `);
+
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({
@@ -40,10 +46,25 @@ app.get("/", async (req, res) => {
   }
 });
 
-app.get("/:id", (req, res) => {
-  res.json({
-    message: `match ${req.params.id} endpoint working`
-  });
+app.get("/:id", async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM match_view WHERE match_id = 1`,
+      [req.params.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "Match not found"
+      });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message
+    });
+  }
 });
 
 app.listen(PORT, () => {

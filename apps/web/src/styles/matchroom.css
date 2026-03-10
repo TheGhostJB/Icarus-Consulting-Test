@@ -1,0 +1,74 @@
+.match-room {
+  background: #f3f5f7;
+  min-height: 100vh;
+}
+
+/* SCOREBOARD */
+
+.scoreboard {
+  background: #0c2d57;
+  color: white;
+  padding: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.team {
+  width: 30%;
+}
+
+.team h2 {
+  margin: 0;
+}
+
+.score {
+  text-align: center;
+}
+
+.score h1 {
+  font-size: 48px;
+  margin: 0;
+}
+
+/* CONTENT AREA */
+
+.match-room-content {
+  display: flex;
+  gap: 20px;
+  padding: 30px;
+}
+
+/* CHAT */
+
+.fan-chat {
+  width: 350px;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.messages {
+  height: 300px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+.chat-input {
+  display: flex;
+  gap: 10px;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 8px;
+}
+
+/* INTERACTION PANEL */
+
+.interaction-panel {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+}

@@ -16,6 +16,7 @@ function Navbar() {
           <NavLink to="/store" style={({ isActive }) => ({ ...styles.link, ...(isActive ? styles.activeLink : {}) })}>Store</NavLink>
           <NavLink to="/news" style={({ isActive }) => ({ ...styles.link, ...(isActive ? styles.activeLink : {}) })}>News</NavLink>
           <NavLink to="/offseason" style={({ isActive }) => ({ ...styles.link, ...(isActive ? styles.activeLink : {}) })}>Off-Season</NavLink>
+          <NavLink to="/voice-agent" style={({ isActive }) => ({ ...styles.link, ...(isActive ? styles.activeLink : {}) })}>Voice Agent</NavLink>
         </div>
       </div>
 

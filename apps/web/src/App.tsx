@@ -5,6 +5,7 @@ import StorePage from "./pages/StorePage";
 import PaySuccess from "./pages/paySuccess";
 import OffSeasonPage from "./pages/OffSeasonPage";
 import TeamPage from "./pages/TeamPage";
+import VoiceAgent from "./components/VoiceAgent/VoiceAgent";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Route path="/store" element={<StorePage />} />
       <Route path="/paySuccess" element={<PaySuccess />} />
       <Route path="/offseason" element={<OffSeasonPage />} />
+      <Route path="/voice-agent" element={<VoiceAgent />} />
     </Routes>
   );
 }

@@ -1,9 +1,12 @@
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 import Navbar from "../components/layout/Navbar";
 import UnityGameCard from "../components/unity/UnityGameCard";
+import WordleGame from "../components/wordle/WordleGame";
 import "../styles/unity.css";
 
 function OffSeasonPage() {
+  const [activeTab, setActiveTab] = useState<"unity" | "wordle">("unity");
+
   return (
     <div style={styles.page}>
       <main style={styles.container}>
@@ -13,14 +16,47 @@ function OffSeasonPage() {
           <h1 style={styles.title}>OFFSEASON</h1>
         </section>
 
-        <UnityGameCard
-          unityConfig={{
-            loaderUrl: "/Build/BuildPrototipo.loader.js",
-            dataUrl: "/Build/BuildPrototipo.data.br",
-            frameworkUrl: "/Build/BuildPrototipo.framework.js.br",
-            codeUrl: "/Build/BuildPrototipo.wasm.br",
-          }}
-        />
+        <section className="offseason-tabs-shell">
+          <div className="offseason-tabs-nav" role="tablist" aria-label="Offseason games">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "unity"}
+              className={`offseason-tab-button ${
+                activeTab === "unity" ? "offseason-tab-button-active" : ""
+              }`}
+              onClick={() => setActiveTab("unity")}
+            >
+              Unity
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "wordle"}
+              className={`offseason-tab-button ${
+                activeTab === "wordle" ? "offseason-tab-button-active" : ""
+              }`}
+              onClick={() => setActiveTab("wordle")}
+            >
+              Wordle
+            </button>
+          </div>
+
+          <div className="offseason-tab-panel" role="tabpanel">
+            {activeTab === "unity" ? (
+              <UnityGameCard
+                unityConfig={{
+                  loaderUrl: "/Build/BuildPrototipo.loader.js",
+                  dataUrl: "/Build/BuildPrototipo.data.br",
+                  frameworkUrl: "/Build/BuildPrototipo.framework.js.br",
+                  codeUrl: "/Build/BuildPrototipo.wasm.br",
+                }}
+              />
+            ) : null}
+
+            {activeTab === "wordle" ? <WordleGame /> : null}
+          </div>
+        </section>
       </main>
     </div>
   );

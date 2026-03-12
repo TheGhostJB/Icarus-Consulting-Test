@@ -5,6 +5,8 @@ export async function getProducts() {
 }
 
 export async function createCheckout(priceId, quantity) {
+    console.log("createCheckout args:", { priceId, quantity });
+
     return await apiFetch("/create_checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

@@ -15,9 +15,11 @@ export async function apiFetch(endpoint, options = {}) {
 
   const response = await fetch(url, config);
 
+  const data = await response.json();
+
   if (!response.ok) {
-    throw new Error(`HTTP error ${response.status}`);
+    throw new Error(data.error || `HTTP error ${response.status}`);
   }
 
-  return response.json();
+  return data;
 }

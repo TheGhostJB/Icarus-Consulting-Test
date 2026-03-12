@@ -4,6 +4,7 @@ import MatchRoomPage from "./pages/MatchRoomPage";
 import StorePage from "./pages/StorePage";
 import PaySuccess from "./pages/paySuccess";
 import OffSeasonPage from "./pages/OffSeasonPage";
+import TeamPage from "./pages/TeamPage";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <Route path="/" element={<MatchesPage />} />
       <Route path="/matches" element={<MatchesPage />} />
       <Route path="/matches/:id" element={<MatchRoomPage />} />
+      <Route path="/team" element={<TeamPage />} />
       <Route path="/store" element={<StorePage />} />
       <Route path="/paySuccess" element={<PaySuccess />} />
       <Route path="/offseason" element={<OffSeasonPage />} />

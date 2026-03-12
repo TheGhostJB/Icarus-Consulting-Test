@@ -9,6 +9,7 @@ services:
       - auth-service
       - matches-service
       - rooms-service
+      - profile-service
       - analytics-service
       - store-service
     networks:
@@ -63,6 +64,16 @@ services:
       PORT: 4005
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       FRONTEND_URL: ${FRONTEND_URL}
+    networks:
+      - supabase_net
+
+  profile-service:
+    build:
+      context: ../services/profile-service
+    container_name: icarus-profile
+    environment:
+      PORT: 4006
+      PROFILE_DB_URL: postgresql://profile_svc:ProfileSvc_2026_dev@supabase-db:5432/profile_db
     networks:
       - supabase_net
 

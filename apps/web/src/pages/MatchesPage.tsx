@@ -44,6 +44,9 @@ function MatchesPage() {
           console.error("Error loading profile:", profileResult.reason);
           setProfileError("No se pudo cargar el perfil.");
         }
+      } catch (err) {
+        console.error("Error loading page data:", err);
+        setError("No se pudieron cargar los partidos.");
       } finally {
         setLoading(false);
       }
@@ -54,7 +57,6 @@ function MatchesPage() {
 
   return (
     <div style={styles.page}>
-
       <main style={styles.container}>
         <Navbar />
 
@@ -201,11 +203,19 @@ function buildVenueText(match: ApiMatch): string {
 function getMatchStatus(match: ApiMatch): "LIVE" | "FINISHED" | "UPCOMING" {
   const status = String(match.status || "").toLowerCase();
 
-  if (status.includes("live") || status.includes("in_progress") || status.includes("in progress")) {
+  if (
+    status.includes("live") ||
+    status.includes("in_progress") ||
+    status.includes("in progress")
+  ) {
     return "LIVE";
   }
 
-  if (status.includes("final") || status.includes("finished") || status.includes("completed")) {
+  if (
+    status.includes("final") ||
+    status.includes("finished") ||
+    status.includes("completed")
+  ) {
     return "FINISHED";
   }
 
@@ -316,7 +326,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: "24px",
     flexWrap: "wrap",
     boxShadow: "0 10px 24px rgba(0,0,0,0.12)",
-    marginBottom: "36px",
+    marginBottom: "28px",
   },
   title: {
     fontSize: "58px",

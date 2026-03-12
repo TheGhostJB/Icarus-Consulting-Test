@@ -1,3 +1,5 @@
+import { NavLink } from "react-router-dom";
+
 function Navbar() {
   return (
     <nav style={styles.navbar}>
@@ -6,14 +8,14 @@ function Navbar() {
         <h2 style={styles.brand}>TITANS CREW</h2>
 
         <div style={styles.links}>
-          <span>Home</span>
-          <span style={styles.activeLink}>Matches</span>
-          <span>Team</span>
-          <span>Community</span>
-          <span>History</span>
-          <span>Store</span>
-          <span>News</span>
-          <span>Off-Season</span>
+          <NavLink to="/" style={styles.link} activeStyle={styles.activeLink}>Home</NavLink>
+          <NavLink to="/matches" style={styles.link} activeStyle={styles.activeLink}>Matches</NavLink>
+          <NavLink to="/team" style={styles.link} activeStyle={styles.activeLink}>Team</NavLink>
+          <NavLink to="/community" style={styles.link} activeStyle={styles.activeLink}>Community</NavLink>
+          <NavLink to="/history" style={styles.link} activeStyle={styles.activeLink}>History</NavLink>
+          <NavLink to="/store" style={styles.link} activeStyle={styles.activeLink}>Store</NavLink>
+          <NavLink to="/news" style={styles.link} activeStyle={styles.activeLink}>News</NavLink>
+          <NavLink to="/offseason" style={styles.link} activeStyle={styles.activeLink}>Off-Season</NavLink>
         </div>
       </div>
 

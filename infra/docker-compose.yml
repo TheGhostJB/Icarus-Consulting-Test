@@ -21,7 +21,7 @@ services:
     container_name: icarus-auth
     environment:
       PORT: 4001
-      AUTH_DB_URL: postgresql://auth_svc:AuthSvc_2026_dev@supabase-db:5432/auth_db
+      AUTH_DB_URL: postgresql://auth_svc:AuthSvc_2026_dev@supabase-db-do4ksgcc0wksg4wwg4osgk0o:5432/auth_db
       JWT_SECRET: dev_secret
     networks:
       - supabase_net
@@ -32,7 +32,7 @@ services:
     container_name: icarus-matches
     environment:
       PORT: 4002
-      MATCHES_DB_URL: postgresql://matches_svc:MatchesSvc_2026_dev@supabase-db:5432/matches_db
+      MATCHES_DB_URL: postgresql://matches_svc:MatchesSvc_2026_dev@supabase-db-do4ksgcc0wksg4wwg4osgk0o:5432/matches_db
     networks:
       - supabase_net
 
@@ -42,7 +42,7 @@ services:
     container_name: icarus-rooms
     environment:
       PORT: 4003
-      ROOMS_DB_URL: postgresql://rooms_svc:RoomsSvc_2026_dev@supabase-db:5432/rooms_db
+      ROOMS_DB_URL: postgresql://rooms_svc:RoomsSvc_2026_dev@supabase-db-do4ksgcc0wksg4wwg4osgk0o:5432/rooms_db
     networks:
       - supabase_net
 
@@ -52,7 +52,7 @@ services:
     container_name: icarus-analytics
     environment:
       PORT: 4004
-      ANALYTICS_DB_URL: postgresql://analytics_svc:AnalyticsSvc_2026_dev@supabase-db:5432/analytics_db
+      ANALYTICS_DB_URL: postgresql://analytics_svc:AnalyticsSvc_2026_dev@supabase-db-do4ksgcc0wksg4wwg4osgk0o:5432/analytics_db
     networks:
       - supabase_net
 

@@ -15,7 +15,7 @@ export const Signup = () => {
         console.log("Auth context session -> ", session);
     }, [session]);
 
-    const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSignUp = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
         setError(null);
@@ -81,21 +81,8 @@ export const Signup = () => {
                         disabled={loading}
                     />
                 </div>
-                <button className="hover: cursor-pointer w-full mt-4" disabled={loading}>
-                    {loading ? "Creating account..." : "Sign Up"}
-                </button>
-                {message && <p className="text-green-700 text-center pt-4">{message}</p>}
+                <button className="w-full mt-4 hover:cursor-pointer">Sign Up</button>
                 {error && <p className="text-red-600 text-center pt-4">{error}</p>}
-                {sessionPreview && (
-                    <pre className="mt-4 whitespace-pre-wrap rounded bg-slate-100 p-3 text-xs text-slate-700">
-                        {sessionPreview}
-                    </pre>
-                )}
-                {session && (
-                    <Link to="/team" className="mt-4 block text-center text-blue-700 underline">
-                        Continue to the team page
-                    </Link>
-                )}
             </form>
         </div>
     );

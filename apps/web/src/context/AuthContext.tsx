@@ -1,14 +1,13 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { isSupabaseConfigured, supabase } from "../supabaseClient";
+import { supabase } from "../supabaseClient";
 import { Session } from "@supabase/supabase-js";
 
 //Auth default value type
-
 interface AuthContextType {
+    session: Session | null;
     signUpNewUser: (email: string, password: string) => Promise<any>;
-    signInUser: (email: string, password: string) => Promise<any>;
-    signOut: () => Promise<any>;
-    isAuthEnabled: boolean;
+    SignInUser: (email: string, password: string) => Promise<any>;
+    SignOut: () => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -40,86 +39,63 @@ export const AuthContextProvider = ( {children} : AuthContextProps ) => {
             console.error("Error signing up: ", error);
             return {
                 success: false, 
-                error
-            }
+                error }
         }
 
         return {
             success: true,
-            user: data.user
+            user: data
         };
     }
 
     //Sign in
-    const signInUser = async (email: string, password: string) => {
-        if (!supabase) {
-            return authUnavailableResponse;
-        }
-
+    const SignInUser = async (email: string, password: string) => {
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const {data, error} = await supabase.auth.signInWithPassword({
                 email: email,
                 password: password
             });
 
-            if (error) {
-                console.error("Error signing in: ", error);
+            if (error){
+                console.error("Sign in error ", error);
                 return {
-                    success: false, 
-                    error
+                    success: false,
+                    error: error.message
                 }
-            }
-
+            };
+            console.log("Successful sign in ", data.session);
             return {
                 success: true,
-                user: data.user
-            };
+                data
+            }
+
         } catch(error) {
-            console.error("An error ocurred", error);
-            return {
-                success: false,
-                error: "Unexpected error signing in", 
-            };
-        }      
-    };
-
-    //Sign out
-    async function signOut() {
-        if (!supabase) {
-            return authUnavailableResponse;
+            console.error("An error ocurred while siging in ", error);
         }
+    }
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: {session}}) => {
+            setSession(session);
+        });
 
-        const { error } = await supabase.auth.signOut();
+        supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session);
+        });
+    }, []);
 
+    // SIgn out
+    const SignOut = async () => {
+        const {error} = await supabase.auth.signOut();
         if (error) {
-            console.error("Error signing out ", error );
+            console.error("There was an error while signing out ", error);
+        } else {
+            console.log("Signed out user")
         }
     }
 
-    //Keep session updated
-    useEffect(() => {
-        if (!supabase) {
-            setSession(null);
-            return;
-        }
-
-        supabase.auth.getSession().then(({data: {session} }) => {
-            setSession(session);
-        });
-
-        const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-        });
-
-        return () => {
-            listener.subscription.unsubscribe();
-        };
-    }, []);
-
-
     return (
         <AuthContext.Provider
-            value={{signUpNewUser, signInUser, signOut, isAuthEnabled: isSupabaseConfigured}}
+            value={{session, signUpNewUser, SignInUser, SignOut}}
         >
             {children}
         </AuthContext.Provider>

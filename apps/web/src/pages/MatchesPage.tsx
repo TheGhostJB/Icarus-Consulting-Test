@@ -4,7 +4,6 @@ import MatchCard from "../components/matches/MatchCard";
 import { getMatches } from "../services/matchesService";
 import { getProfile } from "../services/profileService";
 import type { Match, ApiMatch, Profile } from "../types";
-import { Signin } from "../components/auth/Signin";
 
 function getInitials(firstName?: string, lastName?: string): string {
   const first = firstName ? firstName.charAt(0).toUpperCase() : "";
@@ -60,7 +59,6 @@ function MatchesPage() {
     <div style={styles.page}>
       <main style={styles.container}>
         <Navbar />
-        <Signin />
 
         <section style={styles.hero}>
           <div>

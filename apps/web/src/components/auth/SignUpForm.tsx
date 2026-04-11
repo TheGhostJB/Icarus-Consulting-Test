@@ -36,16 +36,15 @@ export const SignupForm = ({onSuccess}: SignUpProps) => {
 
             setMessage(result.message);
             console.log(message);
-            // navigate("/team");
         } catch (error) {
             console.error("Error signing up outside context ", error);
             setError("An unexpected error occurred during signup.");
         } finally {
             setLoading(false);
+            onSuccess();
         }
     };
 
-    console.log("Email -> ", email, "\npassword -> ", password);
     return (
         <>
             <div className="mb-6 flex flex-row gap-10">
@@ -126,7 +125,7 @@ export const SignupForm = ({onSuccess}: SignUpProps) => {
                     <span className="font-semibold text-slate-900">Privacy Policy</span>
                 </p>
                 <div className="max-w">
-                    <Button type="submit" className="mt-4 h-14 w-full rounded-2xl bg-slate-800">
+                    <Button isDisabled={!email || !password || !confPass || password !== confPass} type="submit" className="mt-4 h-14 w-full rounded-2xl bg-slate-800">
                     Sign Up
                     </Button>
                 </div>

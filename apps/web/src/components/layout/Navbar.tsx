@@ -27,10 +27,12 @@ function Navbar() {
           <NavLink to="/voice-agent" style={({ isActive }) => ({ ...styles.link, ...(isActive ? styles.activeLink : {}) })}>Voice Agent</NavLink>
         </div>
       </div>
-      <div className="gap-12">
-        <button style={styles.loginButton} onClick={() => setIsOpen(true)}>Login / Sign Up</button>
-        <ModalComp isOpen={isOpen} onOpenChange={setIsOpen} children={<SignupForm onSuccess={() => setIsOpen(false)}/>}/>
-      </div>
+      {!session && (
+        <div className="gap-12">
+          <button style={styles.loginButton} onClick={() => setIsOpen(true)}>Login / Sign Up</button>
+          <ModalComp isOpen={isOpen} onOpenChange={setIsOpen} children={<SignupForm onSuccess={() => setIsOpen(false)}/>}/>
+        </div>
+      )}
       {session && <SignOutButton />}
     </nav>
   );

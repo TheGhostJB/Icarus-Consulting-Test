@@ -1,9 +1,12 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { SignOutButton } from "../auth/Signout";
 import { Auth } from "../../context/AuthContext";
+import { ModalComp } from "../general/modal";
+import { SignupForm } from "../auth/SignUpForm";
+import { useState } from "react";
 
 function Navbar() {
-  const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const { session } = Auth();
 
   return (
@@ -25,9 +28,10 @@ function Navbar() {
         </div>
       </div>
       <div className="gap-12">
-        <button style={styles.loginButton} onClick={() => navigate("/signup")}>Login / Sign Up</button>
-        {session ? <SignOutButton /> : <></>}
+        <button style={styles.loginButton} onClick={() => setIsOpen(true)}>Login / Sign Up</button>
+        <ModalComp isOpen={isOpen} onOpenChange={setIsOpen} children={<SignupForm onSuccess={() => setIsOpen(false)}/>}/>
       </div>
+      {session && <SignOutButton />}
     </nav>
   );
 }

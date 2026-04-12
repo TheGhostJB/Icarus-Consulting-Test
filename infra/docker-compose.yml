@@ -65,6 +65,16 @@ services:
     networks:
       - supabase_net
 
+  history-service:
+    build:
+      context: ../services/history-service
+    container_name: icarus-history
+    environment:
+      PORT: 4006
+      HISTORY_DB_URL: postgresql://history_svc:postgres@supabase-db-do4ksgcc0wksg4wwg4osgk0o:5432/history_db
+    networks:
+      - supabase_net
+
 networks:
   supabase_net:
     external: true

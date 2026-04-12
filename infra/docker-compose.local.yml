@@ -14,3 +14,7 @@ services:
   profile-service:
     environment:
       PROFILE_DB_URL: postgresql://profile_svc:ProfileSvc_2026_dev@host.docker.internal:15432/profile_db
+
+  history-service:
+    environment:
+      HISTORY_DB_URL: postgresql://history_svc:postgres@host.docker.internal:15432/history_db

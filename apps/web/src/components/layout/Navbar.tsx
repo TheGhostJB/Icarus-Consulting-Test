@@ -1,6 +1,11 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { SignOutButton } from "../auth/Signout";
+import { Auth } from "../../context/AuthContext";
 
 function Navbar() {
+  const navigate = useNavigate();
+  const { session } = Auth();
+
   return (
     <nav style={styles.navbar}>
       <div style={styles.leftSection}>
@@ -19,8 +24,10 @@ function Navbar() {
           <NavLink to="/voice-agent" style={({ isActive }) => ({ ...styles.link, ...(isActive ? styles.activeLink : {}) })}>Voice Agent</NavLink>
         </div>
       </div>
-
-      <button style={styles.loginButton}>Login / Sign Up</button>
+      <div className="gap-12">
+        <button style={styles.loginButton} onClick={() => navigate("/signup")}>Login / Sign Up</button>
+        {session ? <SignOutButton /> : <></>}
+      </div>
     </nav>
   );
 }

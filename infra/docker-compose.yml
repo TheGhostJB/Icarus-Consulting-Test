@@ -6,23 +6,12 @@ services:
     ports:
       - "8081:8080"
     depends_on:
-      - auth-service
       - matches-service
       - rooms-service
       - profile-service
       - analytics-service
       - store-service
-    networks:
-      - supabase_net
-
-  auth-service:
-    build:
-      context: ../services/auth-service
-    container_name: icarus-auth
-    environment:
-      PORT: 4001
-      AUTH_DB_URL: postgresql://auth_svc:AuthSvc_2026_dev@supabase-db-do4ksgcc0wksg4wwg4osgk0o:5432/auth_db
-      JWT_SECRET: dev_secret
+      - history-service
     networks:
       - supabase_net
 
@@ -74,6 +63,18 @@ services:
     environment:
       PORT: 4006
       PROFILE_DB_URL: postgresql://profile_svc:ProfileSvc_2026_dev@supabase-db:5432/profile_db
+    networks:
+      - supabase_net
+
+  history-service:
+    build:
+      context: ../services/history-service
+    container_name: icarus-history
+    environment:
+      PORT: 4007
+      HISTORY_DB_URL: postgresql://history_svc:postgres@supabase-db-do4ksgcc0wksg4wwg4osgk0o:5432/history_db
+    ports:
+    - "4007:4007"
     networks:
       - supabase_net
 

@@ -1,0 +1,20 @@
+services:
+  matches-service:
+    environment:
+      MATCHES_DB_URL: postgresql://matches_svc:MatchesSvc_2026_dev@host.docker.internal:15432/matches_db
+
+  rooms-service:
+    environment:
+      ROOMS_DB_URL: postgresql://rooms_svc:RoomsSvc_2026_dev@host.docker.internal:15432/rooms_db
+
+  analytics-service:
+    environment:
+      ANALYTICS_DB_URL: postgresql://analytics_svc:AnalyticsSvc_2026_dev@host.docker.internal:15432/analytics_db
+
+  profile-service:
+    environment:
+      PROFILE_DB_URL: postgresql://profile_svc:ProfileSvc_2026_dev@host.docker.internal:15432/profile_db
+
+  history-service:
+    environment:
+      HISTORY_DB_URL: postgresql://history_svc:postgres@host.docker.internal:15432/history_db

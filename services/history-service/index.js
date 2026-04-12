@@ -14,7 +14,7 @@ const { pool } = require("./db");
 const app = express();
 app.use(express.json());
 
-const PORT = process.env.PORT || 4007;
+const PORT = process.env.PORT || 4008;
 
 function resolveTeamSlug(req) {
   return req.params.teamSlug || req.query.teamSlug || DEFAULT_TEAM_SLUG;

@@ -72,10 +72,10 @@ services:
       context: ../services/history-service
     container_name: icarus-history
     environment:
-      PORT: 4007
+      PORT: 4008
       HISTORY_DB_URL: postgresql://history_svc:postgres@supabase-db-do4ksgcc0wksg4wwg4osgk0o:5432/history_db
     ports:
-    - "4007:4007"
+    - "4008:4008"
     networks:
       - supabase_net
 

@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { Auth } from "../../context/AuthContext";
 import { Button, FieldError, Form, Input, Label, TextField } from "@heroui/react";
+import { insertNewUser } from "../../services/profileService";
+import { InsertNewUserRequest } from "../../types";
 
 interface SignUpProps {
     onSuccess: () => void;
@@ -26,14 +28,34 @@ export const SignupForm = ({ onSuccess, onSwitchToSignIn }: SignUpProps) => {
         setMessage(null);
 
         try {
-            const result = await signUpNewUser(email, password);
+            const supabaseAuthRes = await signUpNewUser(email, password);
 
-            if (!result.success) {
-                setError(result.error ?? `An unexpected error occurred during signup ${error}`);
+            if (!supabaseAuthRes.success) {
+                setError(supabaseAuthRes.error ?? `An unexpected error occurred during signup ${error}`);
                 return;
             }
 
-            setMessage(result.message);
+            const [first_name, ...lastNameParts] = name.trim().split(/\s+/);
+            const last_name = lastNameParts.join(" ");
+
+            const payload: InsertNewUserRequest = {
+                user_id: supabaseAuthRes.user.user.id,
+                country: "",
+                first_name,
+                last_name,
+                username: email.split('@')[0],
+                avatar_url: ""
+            };
+            console.log(`user_id: ${supabaseAuthRes.user.user.id} \nFirst name: ${first_name} \nLast name: ${last_name}`)
+
+            const profileRes = await insertNewUser(payload);
+
+            if (!profileRes.new_user) {
+                setError("An unexpected error occurred during signup  within our postgres");
+                return;
+            }
+
+            setMessage(supabaseAuthRes.message);
             onSuccess();
         } catch (error) {
             console.error("Error signing up outside context ", error);

@@ -1,6 +1,6 @@
 const express = require("express");
 const { Pool } = require("pg");
-const jwt = require("jsonwebtoken");
+const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
 app.use(express.json());
@@ -11,7 +11,13 @@ const pool = new Pool({
   connectionString: process.env.PROFILE_DB_URL
 });
 
-function requireAuth(req, res, next) {
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
+
+// Middleware de autenticación usando el access token real de Supabase
+async function requireAuth(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
 
@@ -23,9 +29,10 @@ function requireAuth(req, res, next) {
     }
 
     const token = authHeader.split(" ")[1];
-    const decoded = jwt.decode(token);
 
-    if (!decoded || !decoded.sub) {
+    const { data, error } = await supabase.auth.getUser(token);
+
+    if (error || !data?.user) {
       return res.status(401).json({
         status: "error",
         message: "Invalid token"
@@ -33,8 +40,8 @@ function requireAuth(req, res, next) {
     }
 
     req.user = {
-      id: decoded.sub,
-      email: decoded.email || null
+      id: data.user.id,
+      email: data.user.email || null
     };
 
     next();
@@ -44,12 +51,6 @@ function requireAuth(req, res, next) {
       message: "Authentication failed"
     });
   }
-}
-
-// Helper temporal para obtener el user_id.
-// Más adelante esto saldrá del token JWT.
-function getUserIdFromRequest(req) {
-  return req.query.user_id || req.headers["x-user-id"];
 }
 
 app.get("/health", async (req, res) => {
@@ -102,21 +103,6 @@ app.get("/", async (req, res) => {
   }
 });
 
-app.get("/test-login", async (req, res) => {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: "pablo.zzll@hotmail.com",
-    password: "Salmonmon27#"
-  });
-
-  if (error) {
-    return res.status(400).json({ error: error.message });
-  }
-
-  res.json({
-    token: data.session.access_token
-  });
-});
-
 // Endpoint principal del perfil actual
 app.get("/me", requireAuth, async (req, res) => {
   try {
@@ -157,16 +143,9 @@ app.get("/me", requireAuth, async (req, res) => {
 });
 
 // Actualizar perfil actual
-app.put("/me", async (req, res) => {
+app.put("/me", requireAuth, async (req, res) => {
   try {
     const userId = req.user.id;
-
-    if (!userId) {
-      return res.status(400).json({
-        status: "error",
-        message: "user_id is required for now (query param or x-user-id header)"
-      });
-    }
 
     const {
       first_name,
@@ -232,16 +211,9 @@ app.put("/me", async (req, res) => {
 });
 
 // Obtener direcciones del usuario actual
-app.get("/me/addresses", async (req, res) => {
+app.get("/me/addresses", requireAuth, async (req, res) => {
   try {
-    const userId = getUserIdFromRequest(req);
-
-    if (!userId) {
-      return res.status(400).json({
-        status: "error",
-        message: "user_id is required for now (query param or x-user-id header)"
-      });
-    }
+    const userId = req.user.id;
 
     const result = await pool.query(`
       SELECT
@@ -275,16 +247,9 @@ app.get("/me/addresses", async (req, res) => {
 });
 
 // Crear dirección para el usuario actual
-app.post("/me/addresses", async (req, res) => {
+app.post("/me/addresses", requireAuth, async (req, res) => {
   try {
-    const userId = getUserIdFromRequest(req);
-
-    if (!userId) {
-      return res.status(400).json({
-        status: "error",
-        message: "user_id is required for now (query param or x-user-id header)"
-      });
-    }
+    const userId = req.user.id;
 
     const {
       label,
@@ -363,18 +328,11 @@ app.post("/me/addresses", async (req, res) => {
 });
 
 // Actualizar una dirección del usuario actual
-app.put("/me/addresses/:addressId", async (req, res) => {
+app.put("/me/addresses/:addressId", requireAuth, async (req, res) => {
   try {
-    const userId = getUserIdFromRequest(req);
-
-    if (!userId) {
-      return res.status(400).json({
-        status: "error",
-        message: "user_id is required for now (query param or x-user-id header)"
-      });
-    }
-
+    const userId = req.user.id;
     const { addressId } = req.params;
+
     const {
       label,
       street_line_1,
@@ -459,17 +417,9 @@ app.put("/me/addresses/:addressId", async (req, res) => {
 });
 
 // Eliminar una dirección del usuario actual
-app.delete("/me/addresses/:addressId", async (req, res) => {
+app.delete("/me/addresses/:addressId", requireAuth, async (req, res) => {
   try {
-    const userId = getUserIdFromRequest(req);
-
-    if (!userId) {
-      return res.status(400).json({
-        status: "error",
-        message: "user_id is required for now (query param or x-user-id header)"
-      });
-    }
-
+    const userId = req.user.id;
     const { addressId } = req.params;
 
     const result = await pool.query(`
@@ -499,16 +449,9 @@ app.delete("/me/addresses/:addressId", async (req, res) => {
 });
 
 // Obtener badges del usuario actual
-app.get("/me/badges", async (req, res) => {
+app.get("/me/badges", requireAuth, async (req, res) => {
   try {
-    const userId = getUserIdFromRequest(req);
-
-    if (!userId) {
-      return res.status(400).json({
-        status: "error",
-        message: "user_id is required for now (query param or x-user-id header)"
-      });
-    }
+    const userId = req.user.id;
 
     const result = await pool.query(`
       SELECT
@@ -537,36 +480,66 @@ app.get("/me/badges", async (req, res) => {
   }
 });
 
-// Temporal para pruebas directas por id
-app.get("/:id", async (req, res) => {
+// Se mantiene porque Auth lo usa para crear el registro inicial en accounts
+app.post("/new/user", async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT
-        account_id,
-        user_id,
-        first_name,
-        last_name,
-        username,
-        country,
-        avatar_url,
-        created_at,
-        updated_at
-      FROM accounts
-      WHERE user_id = $1
-    `, [req.params.id]);
+    const {
+      user_id,
+      country,
+      first_name,
+      last_name,
+      username,
+      avatar_url
+    } = req.body;
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({
+    if (!user_id || !first_name) {
+      return res.status(400).json({
         status: "error",
-        message: "Profile not found"
+        message: "user_id and first_name are required"
       });
     }
 
-    res.json({
+    const result = await pool.query(`
+      INSERT INTO accounts (
+        user_id,
+        country,
+        first_name,
+        last_name,
+        username,
+        avatar_url
+      )
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING
+        account_id,
+        user_id,
+        country,
+        first_name,
+        last_name,
+        username,
+        avatar_url,
+        created_at,
+        updated_at
+    `, [
+      user_id,
+      country ?? null,
+      first_name,
+      last_name ?? null,
+      username ?? null,
+      avatar_url ?? null
+    ]);
+
+    res.status(201).json({
       status: "success",
-      profile: result.rows[0]
+      new_user: result.rows[0]
     });
   } catch (error) {
+    if (error.code === "23505") {
+      return res.status(409).json({
+        status: "error",
+        message: "User already exists"
+      });
+    }
+
     res.status(500).json({
       status: "error",
       error: error.message
@@ -574,61 +547,20 @@ app.get("/:id", async (req, res) => {
   }
 });
 
-//
-app.post("/new/user", async (req, res) => {
-  try {
-    const {
-      user_id, 
-      country,
-      first_name, 
-      last_name, 
-      username,
-      avatar_url 
-    } = req.body;
 
-    if (!user_id || !first_name) {
-      return res.status(400).json({
-        status: "error",
-        message: "user_id, first_name are required"
-      });
-    }
+app.get("/debug/token", async (req, res) => {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: "tamtok2.0@gmail.com",
+    password: "Prueba1#"
+  });
 
-    const result = await pool.query(
-      `INSERT INTO accounts (
-        user_id,
-        country, 
-        first_name, 
-        last_name, 
-        username, 
-        avatar_url
-      )
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING
-        account_id,
-        user_id,
-        country, 
-        first_name, 
-        last_name, 
-        username, 
-        avatar_url
-    `, [
-      user_id,
-      country, 
-      first_name, 
-      last_name, 
-      username, 
-      avatar_url
-    ]);
+  if (error) {
+    return res.status(400).json({ error: error.message });
+  }
 
-    res.status(201).json({
-      status: "success",
-      new_user: result.rows[0]}); 
-    } catch(error) {
-      res.status(500).json({
-        status: "error",
-        error: error.message 
-      });
-    }
+  res.json({
+    token: data.session.access_token
+  });
 });
 
 app.listen(PORT, () => {

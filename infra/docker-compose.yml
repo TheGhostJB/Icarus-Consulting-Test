@@ -63,6 +63,8 @@ services:
     environment:
       PORT: 4006
       PROFILE_DB_URL: postgresql://profile_svc:ProfileSvc_2026_dev@supabase-db:5432/profile_db
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
     networks:
       - supabase_net
 

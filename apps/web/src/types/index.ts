@@ -37,4 +37,14 @@ export interface Profile {
   country: string;
   user_id: number | string;
   account_id: number | string;
+  avatar_url: string;
+}
+
+export interface InsertNewUserRequest {
+  user_id: string, 
+  country: string,
+  first_name: string, 
+  last_name: string, 
+  username: string,
+  avatar_url: string 
 }

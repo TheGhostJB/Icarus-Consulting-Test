@@ -1,0 +1,12 @@
+  
+.news-page{
+    min-height: 100vh;
+    background-color: #f4f5f7;
+}
+
+.container{
+  max-width: "1400px";
+  margin: "0px auto";
+  padding: "24px";
+}
+  

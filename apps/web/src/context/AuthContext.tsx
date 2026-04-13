@@ -82,7 +82,8 @@ export const AuthContextProvider = ( {children} : AuthContextProps ) => {
                 queryParams: {
                     access_type: 'offline',
                     prompt: 'consent',
-                }
+                },
+                redirectTo: 'http://localhost:5173'
             } 
         });
 
@@ -94,7 +95,6 @@ export const AuthContextProvider = ( {children} : AuthContextProps ) => {
             };
         };
 
-        console.log("Successful sign in with google");
         return {
             success: true,
             data

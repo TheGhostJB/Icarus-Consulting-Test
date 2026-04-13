@@ -77,11 +77,11 @@ export default function PackOpeningExperience({ result, onClose }: PackOpeningEx
             />
 
             {/* Cuerpo del sobre */}
-            <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-[#1a2a42] to-[#0f1b2d] shadow-[0_20px_50px_rgba(0,0,0,0.45)] ring-1 ring-white/10" />
+            <div className="absolute inset-0 z-0 rounded-lg bg-gradient-to-br from-[#1a2a42] to-[#0f1b2d] shadow-[0_20px_50px_rgba(0,0,0,0.45)] ring-1 ring-white/10" />
 
             {/* Solapa inferior (frente del bolsillo) */}
             <div
-              className="absolute bottom-0 left-0 right-0 h-[58%] rounded-b-lg bg-gradient-to-b from-[#243652] to-[#152238] shadow-inner"
+              className="absolute bottom-0 left-0 right-0 z-[5] h-[58%] rounded-b-lg bg-gradient-to-b from-[#243652] to-[#152238] shadow-inner"
               style={{
                 clipPath: "polygon(0 12%, 50% 0, 100% 12%, 100% 100%, 0 100%)",
               }}
@@ -90,9 +90,10 @@ export default function PackOpeningExperience({ result, onClose }: PackOpeningEx
 
             {/* Sello */}
             <div
-              className={`absolute left-1/2 top-[42%] z-20 flex size-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-gradient-to-br from-[#8b2942] to-[#5c1528] shadow-lg ring-2 ring-[#c94d6a]/50 transition-all duration-500 motion-reduce:duration-150 ${
+              className={`absolute left-1/2 top-[42%] z-[30] flex size-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-gradient-to-br from-[#8b2942] to-[#5c1528] shadow-lg ring-2 ring-[#c94d6a]/50 transition-all duration-500 motion-reduce:duration-150 ${
                 flapOpen ? "scale-75 opacity-0" : "opacity-100"
               }`}
+              style={{ transform: "translate3d(-50%, -50%, 10px)" }}
               aria-hidden
             >
               <span className="text-lg font-black text-[#f5d0a8]">TC</span>

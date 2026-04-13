@@ -1,6 +1,12 @@
 import { apiFetch } from "./api";
 import { resolveHeadshotFromRow } from "../utils/headshotUrl";
-import type { RosterCard, AthleteDetail, CollectionStats, PackOpenResult } from "../types";
+import type {
+  RosterCard,
+  AthleteDetail,
+  CollectionStats,
+  PackOpenResult,
+  PackOpeningState,
+} from "../types";
 
 export async function getRoster(userId?: string): Promise<RosterCard[]> {
   const query = userId != null ? `?user_id=${userId}` : "";
@@ -23,8 +29,20 @@ export async function getCollectionStats(userId: string): Promise<CollectionStat
   return await apiFetch<CollectionStats>(`/api/cards/collection/${userId}`);
 }
 
-export async function openPack(userId: string): Promise<PackOpenResult> {
-  return await apiFetch<PackOpenResult>("/api/cards/pack/open", {
+export async function getPackStatus(userId: string): Promise<PackOpeningState> {
+  return await apiFetch<PackOpeningState>(`/api/cards/pack/status?user_id=${userId}`);
+}
+
+export async function startPackOpening(userId: string): Promise<PackOpeningState> {
+  return await apiFetch<PackOpeningState>("/api/cards/pack/start", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: userId }),
+  });
+}
+
+export async function claimPack(userId: string): Promise<PackOpenResult> {
+  return await apiFetch<PackOpenResult>("/api/cards/pack/claim", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: userId }),

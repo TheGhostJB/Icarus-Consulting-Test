@@ -87,3 +87,13 @@ export interface PackOpenResult {
   }>;
   packs_remaining: number;
 }
+
+export type PackOpeningStatus = "NONE" | "OPENING" | "READY";
+
+export interface PackOpeningState {
+  status: PackOpeningStatus;
+  /** ISO timestamp (server) when pack becomes claimable. */
+  ready_at?: string;
+  /** Seconds until ready (0 when READY). */
+  seconds_remaining?: number;
+}

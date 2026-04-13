@@ -12,8 +12,21 @@ import {
   PackOpeningExperience,
 } from "../components/cards";
 import type { CardFilter } from "../components/cards";
-import { getRoster, getAthleteDetail, getCollectionStats, openPack } from "../services/cardsService";
-import type { RosterCard, AthleteDetail, CollectionStats, PackOpenResult } from "../types";
+import {
+  getRoster,
+  getAthleteDetail,
+  getCollectionStats,
+  getPackStatus,
+  startPackOpening,
+  claimPack,
+} from "../services/cardsService";
+import type {
+  RosterCard,
+  AthleteDetail,
+  CollectionStats,
+  PackOpenResult,
+  PackOpeningState,
+} from "../types";
 import { Auth } from "../context/AuthContext";
 
 const CARDS_PER_PAGE = 12;
@@ -44,6 +57,8 @@ function TeamPage() {
   const [packResult, setPackResult] = useState<PackOpenResult | null>(null);
   const [packRevealOpen, setPackRevealOpen] = useState(false);
   const packRevealActiveRef = useRef(false);
+  const [packState, setPackState] = useState<PackOpeningState | null>(null);
+  const [packSecondsRemaining, setPackSecondsRemaining] = useState<number | null>(null);
 
   // Fetch roster and collection stats
   useEffect(() => {
@@ -57,6 +72,14 @@ function TeamPage() {
         ]);
         setCards(rosterData);
         setStats(statsData);
+        if (currentUserId) {
+          getPackStatus(currentUserId)
+            .then((s) => setPackState(s))
+            .catch(() => {});
+        } else {
+          setPackState({ status: "NONE" });
+          setPackSecondsRemaining(null);
+        }
       } catch (error) {
         console.error("Failed to fetch cards data:", error);
         setCards([]);
@@ -70,6 +93,29 @@ function TeamPage() {
     }
     fetchData();
   }, [currentUserId]);
+
+  // Local countdown ticker (client-side) while pack is opening
+  useEffect(() => {
+    if (packState?.status !== "OPENING" || !packState.ready_at) {
+      setPackSecondsRemaining(null);
+      return;
+    }
+
+    function tick() {
+      const readyAt = packState?.ready_at;
+      if (!readyAt) return;
+      const readyMs = new Date(readyAt).getTime();
+      const sec = Math.max(0, Math.ceil((readyMs - Date.now()) / 1000));
+      setPackSecondsRemaining(sec);
+      if (sec <= 0) {
+        setPackState((prev) => (prev ? { ...prev, status: "READY", seconds_remaining: 0 } : prev));
+      }
+    }
+
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [packState?.status, packState?.ready_at]);
 
   // Filtered cards
   const filteredCards = useMemo(() => {
@@ -138,15 +184,30 @@ function TeamPage() {
     }
   }
 
-  // Open pack handler (overlay con animación de sobre; el resultado llega cuando el API responde)
-  async function handleOpenPack() {
+  async function handleStartPack() {
+    if (!currentUserId) return;
+    setIsOpeningPack(true);
+    try {
+      const s = await startPackOpening(currentUserId);
+      setPackState(s);
+      // refresh packs remaining after reserving one
+      const statsData = await getCollectionStats(currentUserId);
+      setStats(statsData);
+    } catch (error) {
+      console.error("Failed to start pack opening:", error);
+    } finally {
+      setIsOpeningPack(false);
+    }
+  }
+
+  async function handleClaimPack() {
     if (!currentUserId) return;
     setPackRevealOpen(true);
     setPackResult(null);
     packRevealActiveRef.current = true;
     setIsOpeningPack(true);
     try {
-      const result = await openPack(currentUserId);
+      const result = await claimPack(currentUserId);
       if (packRevealActiveRef.current) {
         setPackResult(result);
       }
@@ -157,8 +218,10 @@ function TeamPage() {
       ]);
       setCards(rosterData);
       setStats(statsData);
+      setPackState({ status: "NONE" });
+      setPackSecondsRemaining(null);
     } catch (error) {
-      console.error("Failed to open pack:", error);
+      console.error("Failed to claim pack:", error);
       packRevealActiveRef.current = false;
       setPackRevealOpen(false);
       setPackResult(null);
@@ -232,7 +295,10 @@ function TeamPage() {
         <PackSection
           packsRemaining={stats?.packs_remaining ?? 0}
           isOpening={isOpeningPack}
-          onOpenPack={handleOpenPack}
+          packState={packState}
+          secondsRemaining={packSecondsRemaining ?? packState?.seconds_remaining ?? null}
+          onStartOpening={handleStartPack}
+          onClaim={handleClaimPack}
         />
 
         {/* Modals: solo montar cuando están abiertos para evitar bugs de HeroUI Modal en estado cerrado */}

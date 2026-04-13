@@ -14,14 +14,7 @@ function App() {
       <Route path="/" element={<MatchesPage />} />
       <Route path="/matches" element={<MatchesPage />} />
       <Route path="/matches/:id" element={<MatchRoomPage />} />
-      <Route 
-        path="/team" 
-        element={
-          <PrivateRoute>
-            <TeamPage />{''}
-          </PrivateRoute>
-        } 
-      />
+      <Route path="/team"  element={<TeamPage />} />
       <Route path="/store" element={<StorePage />} />
       <Route path="/paySuccess" element={<PaySuccess />} />
       <Route path="/offseason" element={<OffSeasonPage />} />

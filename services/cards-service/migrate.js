@@ -69,6 +69,25 @@ async function migrate() {
       );
     `);
 
+    // Table: pack_openings (time-gated pack opening per user)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS pack_openings (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'OPENING',
+        started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        ready_at TIMESTAMPTZ NOT NULL,
+        claimed_at TIMESTAMPTZ
+      );
+    `);
+
+    // Enforce max 1 active opening per user
+    await pool.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS pack_openings_one_active_per_user
+      ON pack_openings (user_id)
+      WHERE status = 'OPENING';
+    `);
+
     // Table: sync log for ESPN data
     await pool.query(`
       CREATE TABLE IF NOT EXISTS cards_sync_log (

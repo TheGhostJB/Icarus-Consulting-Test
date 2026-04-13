@@ -1,6 +1,16 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { SignOutButton } from "../auth/Signout";
+import { Auth } from "../../context/AuthContext";
+import { ModalComp } from "../general/modal";
+import { SignupForm } from "../auth/SignUpForm";
+import { SigninWithEmailForm } from "../auth/SignInForm";
+import { useState } from "react";
 
 function Navbar() {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [authView, setAuthView] = useState<"signup" | "signin">("signup");
+  const { session } = Auth();
+
   return (
     <nav style={styles.navbar}>
       <div style={styles.leftSection}>
@@ -19,8 +29,29 @@ function Navbar() {
           <NavLink to="/voice-agent" style={({ isActive }) => ({ ...styles.link, ...(isActive ? styles.activeLink : {}) })}>Voice Agent</NavLink>
         </div>
       </div>
-
-      <button style={styles.loginButton}>Login / Sign Up</button>
+      {!session && (
+        <div className="gap-12">
+          <button style={styles.loginButton} onClick={() => setIsOpen(true)}>Login / Sign Up</button>
+          <ModalComp 
+            isOpen={isOpen} 
+            onOpenChange={setIsOpen} 
+            children={
+              authView === "signup" ? (
+                <SignupForm 
+                  onSuccess={() => setIsOpen(false)} 
+                  onSwitchToSignIn={() => setAuthView("signin")} // Cambia a vista signin
+                />
+              ) : (
+                <SigninWithEmailForm 
+                  onSuccess={() => setIsOpen(false)}
+                  onSwitchToSignUp={() => setAuthView("signup")} 
+                />
+              )
+            }
+          />
+        </div>
+      )}
+      {session && <SignOutButton />}
     </nav>
   );
 }

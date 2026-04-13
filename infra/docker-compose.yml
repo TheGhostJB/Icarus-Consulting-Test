@@ -6,24 +6,12 @@ services:
     ports:
       - "8081:8080"
     depends_on:
-      - auth-service
       - matches-service
       - rooms-service
       - profile-service
       - analytics-service
       - store-service
       - cards-service
-    networks:
-      - supabase_net
-
-  auth-service:
-    build:
-      context: ../services/auth-service
-    container_name: icarus-auth
-    environment:
-      PORT: 4001
-      AUTH_DB_URL: postgresql://auth_svc:AuthSvc_2026_dev@supabase-db-do4ksgcc0wksg4wwg4osgk0o:5432/auth_db
-      JWT_SECRET: dev_secret
     networks:
       - supabase_net
 

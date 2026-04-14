@@ -4,6 +4,7 @@ import MicButton from "./MicButton";
 import StatusIndicator from "./StatusIndicator";
 import TranscriptDisplay from "./TranscriptDisplay";
 import type { Message } from "./TranscriptDisplay";
+import Navbar from "../layout/Navbar";
 
 type Status = "idle" | "listening" | "thinking" | "speaking";
 
@@ -58,15 +59,18 @@ function VoiceAgent() {
     conversation.status === "connected" ? getStatus() : "idle";
 
   return (
-    <div className="flex flex-col items-center gap-6 p-8 min-h-screen bg-white text-gray-900">
-      <h1 className="text-3xl font-bold text-blue-900">TitanCrew</h1>
-      <p className="text-gray-500 text-sm">Voice AI Agent — TitanBot</p>
-      <StatusIndicator status={currentStatus} />
-      <TranscriptDisplay messages={messages} />
-      <MicButton
-        isActive={conversation.status === "connected"}
-        onClick={handleToggle}
-      />
+    <div className="min-h-screen bg-[#F4F5F7] text-gray-900">
+      <main className="mx-auto flex w-full max-w-[1400px] flex-col items-center gap-6 p-6">
+        <Navbar />
+        <h1 className="text-3xl font-bold text-blue-900">TitanCrew</h1>
+        <p className="text-sm text-gray-500">Voice AI Agent — TitanBot</p>
+        <StatusIndicator status={currentStatus} />
+        <TranscriptDisplay messages={messages} />
+        <MicButton
+          isActive={conversation.status === "connected"}
+          onClick={handleToggle}
+        />
+      </main>
     </div>
   );
 }

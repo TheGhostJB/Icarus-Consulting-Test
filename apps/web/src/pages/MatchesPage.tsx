@@ -35,18 +35,18 @@ function MatchesPage() {
           setMatches(mappedMatches);
         } else {
           console.error("Error loading matches:", matchesResult.reason);
-          setError("No se pudieron cargar los partidos.");
+          setError("Could not load matches.");
         }
 
         if (profileResult.status === "fulfilled") {
           setProfile(profileResult.value);
         } else {
           console.error("Error loading profile:", profileResult.reason);
-          setProfileError("No se pudo cargar el perfil.");
+          setProfileError("Could not load profile.");
         }
       } catch (err) {
         console.error("Error loading page data:", err);
-        setError("No se pudieron cargar los partidos.");
+        setError("Could not load matches.");
       } finally {
         setLoading(false);
       }
@@ -88,44 +88,12 @@ function MatchesPage() {
           </div>
         </section>
 
-        {profile && (
-          <section style={styles.profileCard}>
-            <div style={styles.profileHeader}>
-              <div style={styles.avatarCircle}>
-                {getInitials(profile.first_name, profile.last_name)}
-              </div>
-              <div>
-                <h2 style={styles.profileTitle}>
-                  {profile.first_name} {profile.last_name}
-                </h2>
-                <p style={styles.profileUsername}>@{profile.username}</p>
-              </div>
-            </div>
-            <div style={styles.profileDetails}>
-              <div style={styles.profileItem}>
-                <span style={styles.profileLabel}>Country</span>
-                <span style={styles.profileValue}>{profile.country}</span>
-              </div>
-              <div style={styles.profileItem}>
-                <span style={styles.profileLabel}>User ID</span>
-                <span style={styles.profileValue}>{String(profile.user_id)}</span>
-              </div>
-              <div style={styles.profileItem}>
-                <span style={styles.profileLabel}>Account ID</span>
-                <span style={styles.profileValue}>{String(profile.account_id)}</span>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {profileError && <p style={styles.error}>{profileError}</p>}
-
-        {loading && <p style={styles.message}>Cargando partidos...</p>}
+        {loading && <p style={styles.message}>Loading matches...</p>}
 
         {error && <p style={styles.error}>{error}</p>}
 
         {!loading && !error && matches.length === 0 && (
-          <p style={styles.message}>No hay partidos disponibles.</p>
+          <p style={styles.message}>No matches available.</p>
         )}
 
         {!loading && !error && matches.length > 0 && (

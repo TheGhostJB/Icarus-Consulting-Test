@@ -6,23 +6,16 @@ services:
     ports:
       - "8081:8080"
     depends_on:
-      - auth-service
       - matches-service
       - rooms-service
       - profile-service
       - analytics-service
       - store-service
-    networks:
-      - supabase_net
-
-  auth-service:
-    build:
-      context: ../services/auth-service
-    container_name: icarus-auth
-    environment:
-      PORT: 4001
-      AUTH_DB_URL: postgresql://auth_svc:AuthSvc_2026_dev@supabase-db-do4ksgcc0wksg4wwg4osgk0o:5432/auth_db
-      JWT_SECRET: dev_secret
+      - cards-service
+      - history-service
+      - offseason-service
+      - tweets-service
+      - news-service
     networks:
       - supabase_net
 
@@ -67,6 +60,21 @@ services:
     networks:
       - supabase_net
 
+  news-service:
+    build:
+      context: ../services/news-service
+    container_name: icarus-news
+    environment:
+      PORT: 4011
+      NEWS_API_KEY: ${NEWS_API_KEY}
+      NEWS_QUERY: ${NEWS_QUERY:-tennessee-titans}
+      NEWS_PAGE_SIZE: ${NEWS_PAGE_SIZE:-20}
+      NEWS_SORT: ${NEWS_SORT:-publishedAt}
+      NEWS_LANGUAGE: ${NEWS_LANGUAGE:-en}
+      NEWS_DB_URL: ${NEWS_DB_URL:-}
+    networks:
+      - supabase_net
+
   profile-service:
     build:
       context: ../services/profile-service
@@ -74,6 +82,54 @@ services:
     environment:
       PORT: 4006
       PROFILE_DB_URL: postgresql://profile_svc:ProfileSvc_2026_dev@supabase-db:5432/profile_db
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+    ports:
+      - "4006:4006"
+    networks:
+      - supabase_net
+
+  history-service:
+    build:
+      context: ../services/history-service
+    container_name: icarus-history
+    environment:
+      PORT: 4008
+      HISTORY_DB_URL: postgresql://history_svc:postgres@supabase-db-do4ksgcc0wksg4wwg4osgk0o:5432/history_db
+    ports:
+    - "4008:4008"
+    networks:
+      - supabase_net
+
+  offseason-service:
+    build:
+      context: ../services/offseason-service
+    container_name: icarus-offseason
+    environment:
+      PORT: 4010
+      OFFSEASON_DB_URL: postgresql://offseason_svc:OffseasonSvc_2026_dev@supabase-db-do4ksgcc0wksg4wwg4osgk0o:5432/offseason_db
+    ports:
+      - "4010:4010"
+    networks:
+      - supabase_net
+
+  tweets-service:
+    build:
+      context: ../services/tweets-service
+    container_name: icarus-tweets
+    environment:
+      PORT: 4007
+      GETXAPI_KEY: ${GETXAPI_KEY}
+    networks:
+      - supabase_net
+
+  cards-service:
+    build:
+      context: ../services/cards-service
+    container_name: icarus-cards
+    environment:
+      PORT: 4009
+      CARDS_DB_URL: postgresql://cards_svc:CardsSvc_2026_dev@supabase-db-do4ksgcc0wksg4wwg4osgk0o:5432/cards_db
     networks:
       - supabase_net
 

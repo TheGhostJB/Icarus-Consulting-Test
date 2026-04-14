@@ -1,11 +1,29 @@
 import { NavLink } from "react-router-dom";
+import { SignOutButton } from "../auth/Signout";
+import { Auth } from "../../context/AuthContext";
+import { ModalComp } from "../general/modal";
+import { SignupForm } from "../auth/SignUpForm";
+import { SigninWithEmailForm } from "../auth/SignInForm";
+import { useState } from "react";
 
 function Navbar() {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [authView, setAuthView] = useState<"signup" | "signin">("signup");
+  const { session } = Auth();
+
   return (
     <nav style={styles.navbar}>
       <div style={styles.leftSection}>
-        <div style={styles.logoCircle}>TC</div>
-        <h2 style={styles.brand}>TITANS CREW</h2>
+        <div style={styles.brandGroup}>
+          <img
+            src="/team-logos/TitanCrew.svg"
+            alt="Titans Crew"
+            width={72}
+            height={72}
+            style={styles.logoMark}
+          />
+          <h2 style={styles.brand}>TITANS CREW</h2>
+        </div>
 
         <div style={styles.links}>
           <NavLink to="/" style={({ isActive }) => ({ ...styles.link, ...(isActive ? styles.activeLink : {}) })}>Home</NavLink>
@@ -19,8 +37,33 @@ function Navbar() {
           <NavLink to="/voice-agent" style={({ isActive }) => ({ ...styles.link, ...(isActive ? styles.activeLink : {}) })}>Voice Agent</NavLink>
         </div>
       </div>
-
-      <button style={styles.loginButton}>Login / Sign Up</button>
+      {!session && (
+        <div className="gap-12" style={{ flexShrink: 0 }}>
+          <button style={styles.loginButton} onClick={() => setIsOpen(true)}>Login / Sign Up</button>
+          <ModalComp 
+            isOpen={isOpen} 
+            onOpenChange={setIsOpen} 
+            children={
+              authView === "signup" ? (
+                <SignupForm 
+                  onSuccess={() => setIsOpen(false)} 
+                  onSwitchToSignIn={() => setAuthView("signin")} // Cambia a vista signin
+                />
+              ) : (
+                <SigninWithEmailForm 
+                  onSuccess={() => setIsOpen(false)}
+                  onSwitchToSignUp={() => setAuthView("signup")} 
+                />
+              )
+            }
+          />
+        </div>
+      )}
+      {session && (
+        <div style={{ flexShrink: 0 }}>
+          <SignOutButton />
+        </div>
+      )}
     </nav>
   );
 }
@@ -34,6 +77,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    gap: "24px",
     marginBottom: "24px",
   },
   leftSection: {
@@ -41,32 +85,48 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: "center",
     gap: "18px",
     flexWrap: "wrap",
+    flex: 1,
+    minWidth: 0,
+    overflow: "hidden",
   },
-  logoCircle: {
-    width: "52px",
-    height: "52px",
-    borderRadius: "50%",
-    backgroundColor: "#0B2A55",
-    color: "white",
+  brandGroup: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
-    fontWeight: "bold",
-    border: "2px solid #d62839",
+    gap: "18px",
+    flexShrink: 0,
+  },
+  logoMark: {
+    width: "72px",
+    height: "72px",
+    objectFit: "contain",
+    flexShrink: 0,
+    display: "block",
   },
   brand: {
     color: "#0B2A55",
     fontSize: "28px",
-    marginRight: "20px",
+    marginRight: "0",
+    flexShrink: 0,
+    whiteSpace: "nowrap",
   },
   links: {
     display: "flex",
     gap: "18px",
     color: "#374151",
     fontSize: "16px",
-    flexWrap: "wrap",
+    flexWrap: "nowrap",
+    flex: 1,
+    minWidth: 0,
+    overflowX: "auto",
+    WebkitOverflowScrolling: "touch",
+    scrollbarGutter: "stable",
+    alignItems: "center",
+    flexShrink: 1,
   },
-  link: {},
+  link: {
+    flexShrink: 0,
+    whiteSpace: "nowrap",
+  },
   activeLink: {
     fontWeight: "bold",
   },

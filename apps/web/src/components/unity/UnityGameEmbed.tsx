@@ -171,12 +171,12 @@ function UnityGameEmbed({
 
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isUnityLoaded, setIsUnityLoaded] = useState(false);
-  const [unityStatus, setUnityStatus] = useState("Cargando build de Unity...");
+  const [unityStatus, setUnityStatus] = useState("Loading Unity build...");
   const [unityError, setUnityError] = useState("");
-  const [joyConStatus, setJoyConStatus] = useState("Joy-Con no conectado");
+  const [joyConStatus, setJoyConStatus] = useState("Joy-Con not connected");
   const [bridgeStatus, setBridgeStatus] = useState("Bridge idle");
-  const [bridgeMotionStatus, setBridgeMotionStatus] = useState("Sin eventos de movimiento");
-  const [bridgeButtonStatus, setBridgeButtonStatus] = useState("Sin eventos de botones");
+  const [bridgeMotionStatus, setBridgeMotionStatus] = useState("No motion events yet");
+  const [bridgeButtonStatus, setBridgeButtonStatus] = useState("No button events yet");
   const [bridgeError, setBridgeError] = useState("");
   const [reportCount, setReportCount] = useState(0);
   const [zrStateLabel, setZrStateLabel] = useState("ZR: up");
@@ -192,25 +192,28 @@ function UnityGameEmbed({
   }
 
   function getControlStatusLabel(): string {
-    const normalizedStatus = joyConStatus.toLowerCase();
-
-    if (normalizedStatus.includes("conectado")) {
-      return "IOT CONTROL: CONECTADO";
+    const s = joyConStatus.toLowerCase();
+    const looksConnected =
+      s.includes("connected:") ||
+      (s.includes("connected") &&
+        !s.includes("not connected") &&
+        !s.includes("disconnected") &&
+        !s.includes("could not connect"));
+    if (looksConnected) {
+      return "IOT CONTROL: CONNECTED";
     }
-
-    if (normalizedStatus.includes("conect")) {
-      return "IOT CONTROL: CONECTANDO";
+    if (s.includes("connecting")) {
+      return "IOT CONTROL: CONNECTING";
     }
-
-    return "IOT CONTROL: NO CONECTADO";
+    return "IOT CONTROL: NOT CONNECTED";
   }
 
   function safeSendToUnity(method: string, payload = ""): boolean {
     const unityInstance = unityInstanceRef.current;
-    const statusMessage = `Enviado -> ${UNITY_BRIDGE_OBJECT}.${method}`;
+    const statusMessage = `Sent -> ${UNITY_BRIDGE_OBJECT}.${method}`;
 
     if (!unityInstance || !isUnityLoadedRef.current) {
-      updateState(setBridgeStatus, `Unity no cargado (intentando ${method})`);
+      updateState(setBridgeStatus, `Unity not loaded (attempting ${method})`);
       return false;
     }
 
@@ -318,7 +321,7 @@ function UnityGameEmbed({
   }
 
   async function initializeJoyConMotion(device: HIDDevice): Promise<void> {
-    updateState(setMotionStatus, "Inicializando IMU...");
+    updateState(setMotionStatus, "Initializing IMU...");
     await sendJoyConSubcommand(device, JOYCON_SUBCOMMAND_ENABLE_IMU, [0x01]);
     await wait(50);
     await sendJoyConSubcommand(
@@ -327,7 +330,7 @@ function UnityGameEmbed({
       [JOYCON_STANDARD_FULL_MODE],
     );
     await wait(50);
-    updateState(setMotionStatus, "IMU activo");
+    updateState(setMotionStatus, "IMU active");
   }
 
   async function disconnectJoyCon(): Promise<void> {
@@ -350,30 +353,30 @@ function UnityGameEmbed({
     clearZrSyncLoop();
     clearBridgeSyncLoop();
 
-    updateState(setJoyConStatus, "Joy-Con desconectado");
+    updateState(setJoyConStatus, "Joy-Con disconnected");
     updateState(setReportCount, 0);
     updateState(setZrStateLabel, "ZR: up");
     updateState(setMotionStatus, "IMU idle");
     updateState(setButtonBytesLabel, "Buttons: -- -- --");
-    updateState(setBridgeMotionStatus, "Sin eventos de movimiento");
-    updateState(setBridgeButtonStatus, "Sin eventos de botones");
+    updateState(setBridgeMotionStatus, "No motion events yet");
+    updateState(setBridgeButtonStatus, "No button events yet");
     syncBridgeState();
   }
 
   async function connectJoyCon(): Promise<void> {
     if (!hasWebHid) {
-      updateState(setJoyConStatus, "WebHID no soportado en este navegador");
+      updateState(setJoyConStatus, "WebHID is not supported in this browser");
       return;
     }
 
     try {
-      updateState(setJoyConStatus, "Conectando");
+      updateState(setJoyConStatus, "Connecting");
       const devices = await navigator.hid.requestDevice({
         filters: [{ vendorId: NINTENDO_VENDOR_ID }],
       });
 
       if (!devices.length) {
-        updateState(setJoyConStatus, "No seleccionaste un Joy-Con");
+        updateState(setJoyConStatus, "No Joy-Con was selected");
         return;
       }
 
@@ -396,7 +399,7 @@ function UnityGameEmbed({
         updateState(setReportCount, (previous) => previous + 1);
         updateState(
           setMotionStatus,
-          `Recibiendo reportes 0x${reportId.toString(16)}`,
+          `Receiving reports 0x${reportId.toString(16)}`,
         );
         updateState(setButtonBytesLabel, formatButtonBytes(bytes));
 
@@ -429,17 +432,17 @@ function UnityGameEmbed({
 
       updateState(
         setJoyConStatus,
-        `Joy-Con conectado: ${device.productName || "Nintendo HID"}`,
+        `Joy-Con connected: ${device.productName || "Nintendo HID"}`,
       );
-      updateState(setBridgeStatus, "Bridge listo para enviar datos");
-      updateState(setBridgeMotionStatus, "Sin eventos de movimiento");
-      updateState(setBridgeButtonStatus, "Sin eventos de botones");
+      updateState(setBridgeStatus, "Bridge ready to send data");
+      updateState(setBridgeMotionStatus, "No motion events yet");
+      updateState(setBridgeButtonStatus, "No button events yet");
       updateState(setBridgeError, "");
       syncBridgeState();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error desconocido";
-      updateState(setJoyConStatus, `No se pudo conectar Joy-Con: ${message}`);
-      updateState(setBridgeError, `Fallo WebHID: ${message}`);
+      const message = error instanceof Error ? error.message : "Unknown error";
+      updateState(setJoyConStatus, `Could not connect Joy-Con: ${message}`);
+      updateState(setBridgeError, `WebHID error: ${message}`);
     }
   }
 
@@ -453,7 +456,7 @@ function UnityGameEmbed({
     script.onload = async () => {
       try {
         if (!window.createUnityInstance || !canvasRef.current) {
-          throw new Error("No se encontro createUnityInstance en el loader.");
+          throw new Error("createUnityInstance was not found in the Unity loader.");
         }
 
         const unityInstance = await window.createUnityInstance(
@@ -473,7 +476,7 @@ function UnityGameEmbed({
             updateState(setLoadingProgress, progress);
             updateState(
               setUnityStatus,
-              `Cargando build de Unity... ${Math.round(progress * 100)}%`,
+              `Loading Unity build... ${Math.round(progress * 100)}%`,
             );
           },
         );
@@ -481,7 +484,7 @@ function UnityGameEmbed({
         unityInstanceRef.current = unityInstance;
         isUnityLoadedRef.current = true;
         updateState(setIsUnityLoaded, true);
-        updateState(setUnityStatus, "Unity listo");
+        updateState(setUnityStatus, "Unity ready");
         updateState(setUnityError, "");
         startBridgeSyncLoop();
 
@@ -491,16 +494,16 @@ function UnityGameEmbed({
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        updateState(setUnityStatus, "No se pudo cargar Unity");
+        updateState(setUnityStatus, "Could not load Unity");
         updateState(setUnityError, message);
       }
     };
 
     script.onerror = () => {
-      updateState(setUnityStatus, "No se pudo cargar el loader de Unity");
+      updateState(setUnityStatus, "Could not load the Unity loader");
       updateState(
         setUnityError,
-        "Verifica que los archivos BuildPrototipo3.* existan en apps/web/public/Build.",
+        "Make sure the BuildPrototipo3.* files exist under apps/web/public/Build.",
       );
     };
 
@@ -527,39 +530,39 @@ function UnityGameEmbed({
   }, [loaderUrl, dataUrl, frameworkUrl, codeUrl]);
 
   return (
-    <div className="unity-embed">
-      <div className="unity-toolbar">
-        <div>
-          <p className="unity-toolbar-title">{getControlStatusLabel()}</p>
+    <div className="grid gap-4">
+      <div className="flex items-start justify-between gap-4 rounded-[18px] border border-[#d8dee5] bg-[#f5f8fb] p-4 max-[900px]:flex-col">
+        <div className="grid gap-0.5">
+          <p className="mb-1.5 font-bold text-[#0b2a55]">{getControlStatusLabel()}</p>
         </div>
 
-        <div className="unity-toolbar-actions">
+        <div className="flex flex-wrap gap-2.5">
           <button
             type="button"
-            className="unity-primary-button"
+            className="cursor-pointer rounded-full border-0 bg-[#0f3d78] px-[18px] py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => void connectJoyCon()}
             disabled={!hasWebHid}
           >
-            Conectar Joy-Con
+            Connect Joy-Con
           </button>
           <button
             type="button"
-            className="unity-secondary-button"
+            className="cursor-pointer rounded-full border border-[#b7c4d1] bg-white px-[18px] py-3 text-sm font-bold text-[#28415a]"
             onClick={() => void disconnectJoyCon()}
           >
-            Desconectar
+            Disconnect
           </button>
         </div>
       </div>
 
-      <div className="unity-canvas-shell">
+      <div className="relative min-h-[560px] overflow-hidden rounded-[22px] bg-[radial-gradient(circle_at_top,rgba(214,40,57,0.2),transparent_24%),linear-gradient(180deg,#07162d_0%,#050b15_100%)] max-[900px]:min-h-[420px]">
         {!isUnityLoaded ? (
-          <div className="unity-loading-overlay">
-            <div className="unity-loading-box">
-              <p>{unityStatus}</p>
-              <div className="unity-loading-track">
+          <div className="absolute inset-0 z-[2] flex items-center justify-center bg-[rgba(5,11,21,0.78)] backdrop-blur-[6px]">
+            <div className="w-[min(360px,calc(100%-40px))] text-white">
+              <p className="mb-3 text-center font-bold">{unityStatus}</p>
+              <div className="h-3 w-full overflow-hidden rounded-full bg-[rgba(255,255,255,0.15)]">
                 <div
-                  className="unity-loading-fill"
+                  className="h-full rounded-full bg-[linear-gradient(90deg,#d62839_0%,#ff9e5e_100%)] transition-[width] duration-180 ease-in-out"
                   style={{ width: `${Math.round(loadingProgress * 100)}%` }}
                 />
               </div>
@@ -570,7 +573,7 @@ function UnityGameEmbed({
         <canvas
           ref={canvasRef}
           id="unity-canvas"
-          className="unity-canvas"
+          className="block min-h-[560px] w-full border-0 max-[900px]:min-h-[420px]"
           width="960"
           height="600"
           tabIndex={-1}

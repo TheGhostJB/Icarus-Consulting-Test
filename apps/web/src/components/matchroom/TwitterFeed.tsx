@@ -13,18 +13,13 @@ export function TwitterFeed() {
 
   const handleRefresh = () => {
     fetchTweets('TitansCrew');
-  }
+  };
 
   return (
-    <div className='twitter-feed'>
-        <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 16
-        }}>
+    <div className="twitter-feed">
+        <div className="twitter-feed__header">
             <h3>Utiliza el #TitansCrew en X para salir en el feed</h3>
-            <div style={{display: 'flex', gap: 8}}>
+            <div className="twitter-feed__actions">
                 {!isActive? (
                     <button
                     onClick={handleActivate}
@@ -62,16 +57,12 @@ export function TwitterFeed() {
         </div>
 
         {error && (
-            <p style={{color: 'red', padding:12, backgroundColor: '#fee'}}>
+            <p className="twitter-feed__error" style={{color: 'red', padding:12, backgroundColor: '#fee'}}>
                 {error}
             </p>
         )}
 
-        <div style={{
-            maxHeight:'600px',
-            overflowY: 'auto',
-            padding: '0 8px'
-        }}>
+        <div className="twitter-feed__list">
             {tweets.map((tweet) => (
                 <TweetCard key={tweet.id} tweet={tweet} />
             ))}

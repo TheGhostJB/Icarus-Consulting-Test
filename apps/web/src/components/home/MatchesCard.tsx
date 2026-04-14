@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Button, Card, Chip } from "@heroui/react";
+import { Button, Card } from "@heroui/react";
 import { FiArrowRight } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { getMatches } from "../../services/matchesService";
 import type { ApiMatch } from "../../types";
+import { parseAbbrsFromShortName, teamLogoUrl } from "../../utils/teamLogo";
 
 type MatchesCardProps = {
   statusLabel?: string;
@@ -160,11 +161,17 @@ function MatchesCard({
   const resolvedHomeTeam = homeTeam ?? featuredMatch?.home_team ?? "Tennessee Titans";
   const resolvedHomeLabel =
     homeLabel ?? getHomeAwayLabel(featuredMatch, "home");
-  const resolvedAwayTeam = awayTeam ?? featuredMatch?.away_team ?? "Kansas City Chiefs";
+  const resolvedAwayTeam = awayTeam ?? featuredMatch?.away_team ?? "Houston Texans";
   const resolvedAwayLabel =
     awayLabel ?? getHomeAwayLabel(featuredMatch, "away");
   const resolvedDaysLeft =
     daysLeft ?? getDaysUntilMatch(featuredMatch?.start_time);
+
+  const { home: abbrHome, away: abbrAway } = parseAbbrsFromShortName(
+    featuredMatch?.short_name
+  );
+  const homeLogoAbbr = abbrHome ?? "TEN";
+  const awayLogoAbbr = abbrAway ?? "HOU";
 
   function openMatchRoom() {
     navigate("/matches");
@@ -195,7 +202,12 @@ function MatchesCard({
               </div>
 
               <div style={styles.logoPlaceholderLeft}>
-                <div style={styles.logoShadow} />
+                <img
+                  src={teamLogoUrl(homeLogoAbbr)}
+                  alt=""
+                  style={styles.teamLogoImg}
+                />
+                <div style={styles.logoShadow} aria-hidden />
               </div>
             </div>
 
@@ -203,7 +215,12 @@ function MatchesCard({
 
             <div style={styles.teamBlockRight}>
               <div style={styles.logoPlaceholderRight}>
-                <div style={styles.logoShadow} />
+                <img
+                  src={teamLogoUrl(awayLogoAbbr)}
+                  alt=""
+                  style={styles.teamLogoImg}
+                />
+                <div style={styles.logoShadow} aria-hidden />
               </div>
 
               <div style={styles.teamTextWrapLeft}>
@@ -325,13 +342,13 @@ const styles: Record<string, React.CSSProperties> = {
   },
   teamBlockLeft: {
     display: "grid",
-    gridTemplateColumns: "minmax(0, 1fr) 180px",
+    gridTemplateColumns: "minmax(0, 1fr) 132px",
     alignItems: "center",
     gap: "16px",
   },
   teamBlockRight: {
     display: "grid",
-    gridTemplateColumns: "180px minmax(0, 1fr)",
+    gridTemplateColumns: "132px minmax(0, 1fr)",
     alignItems: "center",
     gap: "16px",
   },
@@ -370,29 +387,48 @@ const styles: Record<string, React.CSSProperties> = {
   },
   logoPlaceholderLeft: {
     position: "relative",
-    width: "180px",
-    height: "120px",
-    borderRadius: "28px",
+    width: "132px",
+    height: "132px",
+    borderRadius: "50%",
     background:
       "linear-gradient(135deg, rgba(121, 168, 234, 0.12) 0%, rgba(38, 84, 142, 0.08) 100%)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
   },
   logoPlaceholderRight: {
     position: "relative",
-    width: "180px",
-    height: "120px",
-    borderRadius: "28px",
+    width: "132px",
+    height: "132px",
+    borderRadius: "50%",
     background:
       "linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(148, 163, 184, 0.08) 100%)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  teamLogoImg: {
+    position: "relative",
+    zIndex: 1,
+    width: "auto",
+    height: "auto",
+    maxWidth: "96px",
+    maxHeight: "96px",
+    objectFit: "contain",
+    borderRadius: "50%",
   },
   logoShadow: {
     position: "absolute",
     left: "50%",
-    bottom: "20px",
+    bottom: "10px",
     transform: "translateX(-50%)",
-    width: "140px",
-    height: "46px",
+    width: "72px",
+    height: "22px",
     borderRadius: "50%",
     background: "rgba(5, 20, 43, 0.28)",
+    zIndex: 0,
   },
   ctaButton: {
     width: "100%",

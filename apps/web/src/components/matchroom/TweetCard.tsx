@@ -12,6 +12,9 @@ export function TweetCard({ tweet }: { tweet: Tweet }) {
         backgroundColor: '#fff',
         color: '#14171a',
         textAlign: 'left',
+        minWidth: 0,
+        maxWidth: '100%',
+        boxSizing: 'border-box',
       }}
     >
       <header
@@ -52,9 +55,9 @@ export function TweetCard({ tweet }: { tweet: Tweet }) {
             {tweet.author.name?.charAt(0)?.toUpperCase() || '@'}
           </div>
         )}
-        <div>
-          <strong style={{ display: 'block' }}>{tweet.author.name}</strong>
-          <span style={{ color: '#657786', fontSize: 14 }}>
+        <div style={{ minWidth: 0, overflow: 'hidden' }}>
+          <strong style={{ display: 'block', overflowWrap: 'anywhere' }}>{tweet.author.name}</strong>
+          <span style={{ color: '#657786', fontSize: 14, overflowWrap: 'anywhere' }}>
             @{tweet.author.userName}
           </span>
         </div>
@@ -75,9 +78,11 @@ export function TweetCard({ tweet }: { tweet: Tweet }) {
           color: '#657786',
           fontSize: 14,
           display: 'flex',
+          flexWrap: 'wrap',
           alignItems: 'center',
-          gap: 16,
+          gap: '8px 16px',
           marginTop: 8,
+          minWidth: 0,
         }}
       >
         <span>❤️ {tweet.likeCount}</span>
@@ -87,7 +92,7 @@ export function TweetCard({ tweet }: { tweet: Tweet }) {
           href={tweet.url}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ marginLeft: 'auto', color: '#1da1f2' }}
+          style={{ marginLeft: 'auto', color: '#1da1f2', flexShrink: 0, whiteSpace: 'nowrap' }}
         >
           Ver en X →
         </a>

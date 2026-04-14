@@ -35,3 +35,7 @@ services:
   offseason-service:
     environment:
       OFFSEASON_DB_URL: postgresql://offseason_svc:OffseasonSvc_2026_dev@host.docker.internal:15432/offseason_db
+
+  cards-service:
+    environment:
+      CARDS_DB_URL: postgresql://cards_svc:CardsSvc_2026_dev@host.docker.internal:15432/cards_db

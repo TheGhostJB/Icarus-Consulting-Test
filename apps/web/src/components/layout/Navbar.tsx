@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { SignOutButton } from "../auth/Signout";
 import { Auth } from "../../context/AuthContext";
 import { ModalComp } from "../general/modal";
@@ -14,8 +14,16 @@ function Navbar() {
   return (
     <nav style={styles.navbar}>
       <div style={styles.leftSection}>
-        <div style={styles.logoCircle}>TC</div>
-        <h2 style={styles.brand}>TITANS CREW</h2>
+        <div style={styles.brandGroup}>
+          <img
+            src="/team-logos/TitanCrew.svg"
+            alt="Titans Crew"
+            width={72}
+            height={72}
+            style={styles.logoMark}
+          />
+          <h2 style={styles.brand}>TITANS CREW</h2>
+        </div>
 
         <div style={styles.links}>
           <NavLink to="/" style={({ isActive }) => ({ ...styles.link, ...(isActive ? styles.activeLink : {}) })}>Home</NavLink>
@@ -30,7 +38,7 @@ function Navbar() {
         </div>
       </div>
       {!session && (
-        <div className="gap-12">
+        <div className="gap-12" style={{ flexShrink: 0 }}>
           <button style={styles.loginButton} onClick={() => setIsOpen(true)}>Login / Sign Up</button>
           <ModalComp 
             isOpen={isOpen} 
@@ -51,7 +59,11 @@ function Navbar() {
           />
         </div>
       )}
-      {session && <SignOutButton />}
+      {session && (
+        <div style={{ flexShrink: 0 }}>
+          <SignOutButton />
+        </div>
+      )}
     </nav>
   );
 }
@@ -72,32 +84,47 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: "center",
     gap: "18px",
     flexWrap: "wrap",
+    flex: 1,
+    minWidth: 0,
   },
-  logoCircle: {
-    width: "52px",
-    height: "52px",
-    borderRadius: "50%",
-    backgroundColor: "#0B2A55",
-    color: "white",
+  brandGroup: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
-    fontWeight: "bold",
-    border: "2px solid #d62839",
+    gap: "18px",
+    flexShrink: 0,
+  },
+  logoMark: {
+    width: "72px",
+    height: "72px",
+    objectFit: "contain",
+    flexShrink: 0,
+    display: "block",
   },
   brand: {
     color: "#0B2A55",
     fontSize: "28px",
-    marginRight: "20px",
+    marginRight: "0",
+    flexShrink: 0,
+    whiteSpace: "nowrap",
   },
   links: {
     display: "flex",
     gap: "18px",
     color: "#374151",
     fontSize: "16px",
-    flexWrap: "wrap",
+    flexWrap: "nowrap",
+    flex: 1,
+    minWidth: 0,
+    overflowX: "auto",
+    WebkitOverflowScrolling: "touch",
+    scrollbarGutter: "stable",
+    alignItems: "center",
+    flexShrink: 1,
   },
-  link: {},
+  link: {
+    flexShrink: 0,
+    whiteSpace: "nowrap",
+  },
   activeLink: {
     fontWeight: "bold",
   },

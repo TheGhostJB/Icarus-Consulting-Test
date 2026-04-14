@@ -47,6 +47,7 @@ function NewsPage() {
 
 
         <NewsCard/>
+        
       </main>
     </div>
   );

@@ -15,33 +15,33 @@ export interface CarouselSlide {
 const DEFAULT_SLIDES: CarouselSlide[] = [
   {
     id: "community",
-    title: "Conecta Con La Comunidad",
+    title: "Connect with the Community",
     subtitle:
-      "Descubre conversaciones, novedades y espacios para compartir la pasion por el equipo con otros fans.",
-    buttonLabel: "Ir a Comunidad",
+    "Discover conversations, updates, and spaces to share your passion for the team with other fans.",
+    buttonLabel: "Go to Community",
     route: "/community",
     backgroundImage:
-      "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1600&q=80",
+    "https://static.clubs.nfl.com/image/private/t_editorial_landscape_12_desktop/titans/euo2byipvkx3hf764lga",
   },
-  {
+    {
     id: "cards",
-    title: "Explora Tus Cartas",
+    title: "Explore Your Cards",
     subtitle:
-      "Accede a la coleccion del equipo, revisa jugadores destacados y vive una experiencia visual mas inmersiva.",
-    buttonLabel: "Ver Cartas",
+        "Access the team’s collection, review featured players, and enjoy a more immersive visual experience.",
+    buttonLabel: "View Cards",
     route: "/team",
     backgroundImage:
-      "https://images.unsplash.com/photo-1508098682722-e99c643e7485?auto=format&fit=crop&w=1600&q=80",
-  },
-  {
+        "https://www.clarksvilleonline.com/wp-content/uploads/2022/12/2022-Tennessee-Titans-21.jpg",
+    },
+    {
     id: "voice-agent",
-    title: "Habla Con El Agente De Voz",
+    title: "Talk to the Voice Agent",
     subtitle:
-      "Inicia una experiencia conversacional para recibir ayuda, informacion del equipo y respuestas en tiempo real.",
-    buttonLabel: "Abrir Agente",
+        "Start a conversational experience to get help, team information, and real-time answers.",
+    buttonLabel: "Open Agent",
     route: "/voice-agent",
     backgroundImage:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1600&q=80",
+        "https://www.whiteclouds.com/wp-content/uploads/2023/08/NFL-Mascots-T-Rac-Titans.jpg",
   },
 ];
 
@@ -110,7 +110,7 @@ function CarouselHome({
             </button>
 
             <div className="carousel-home-content">
-              <p className="carousel-home-kicker">Experiencias Titans</p>
+              <p className="carousel-home-kicker">Titan Experiences</p>
               <h2 className="carousel-home-title">{activeSlide.title}</h2>
               <p className="carousel-home-subtitle">{activeSlide.subtitle}</p>
 

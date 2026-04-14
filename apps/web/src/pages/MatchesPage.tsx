@@ -88,38 +88,6 @@ function MatchesPage() {
           </div>
         </section>
 
-        {profile && (
-          <section style={styles.profileCard}>
-            <div style={styles.profileHeader}>
-              <div style={styles.avatarCircle}>
-                {getInitials(profile.first_name, profile.last_name)}
-              </div>
-              <div>
-                <h2 style={styles.profileTitle}>
-                  {profile.first_name} {profile.last_name}
-                </h2>
-                <p style={styles.profileUsername}>@{profile.username}</p>
-              </div>
-            </div>
-            <div style={styles.profileDetails}>
-              <div style={styles.profileItem}>
-                <span style={styles.profileLabel}>Country</span>
-                <span style={styles.profileValue}>{profile.country}</span>
-              </div>
-              <div style={styles.profileItem}>
-                <span style={styles.profileLabel}>User ID</span>
-                <span style={styles.profileValue}>{String(profile.user_id)}</span>
-              </div>
-              <div style={styles.profileItem}>
-                <span style={styles.profileLabel}>Account ID</span>
-                <span style={styles.profileValue}>{String(profile.account_id)}</span>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {profileError && <p style={styles.error}>{profileError}</p>}
-
         {loading && <p style={styles.message}>Cargando partidos...</p>}
 
         {error && <p style={styles.error}>{error}</p>}

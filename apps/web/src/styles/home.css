@@ -73,6 +73,14 @@
   white-space: nowrap;
 }
 
+.home-section-image {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  border-radius: 24px;
+  object-fit: cover;
+}
+
 .home-subtitle {
   font-size: 24px;
   margin-bottom: 22px;

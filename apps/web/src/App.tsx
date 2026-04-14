@@ -9,6 +9,7 @@ import HistoryPage from "./pages/HistoryPage";
 import VoiceAgent from "./components/VoiceAgent/VoiceAgent";
 import PrivateRoute from "./components/auth/privateRoute";
 import NewsPage from "./pages/NewsPage";
+import ProfilePage from "./pages/ProfilePage";
 import HomePage from "./pages/HomePage";
 import CommunityPage from "./pages/CommunityPage";
 
@@ -18,6 +19,22 @@ function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/matches" element={<MatchesPage />} />
       <Route path="/matches/:id" element={<MatchRoomPage />} />
+      <Route 
+        path="/team" 
+        element={
+          <PrivateRoute>
+            <TeamPage />{''}
+          </PrivateRoute>
+        } 
+      />
+      <Route 
+        path="/profile" 
+        element={
+          <PrivateRoute>
+            <ProfilePage />
+          </PrivateRoute>
+        } 
+      />
       <Route path="/team" element={<TeamPage />} />
       <Route path="/community" element={<CommunityPage />} />
       <Route path="/history" element={<HistoryPage />} />

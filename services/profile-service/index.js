@@ -1,5 +1,6 @@
 const express = require("express");
 const { Pool } = require("pg");
+const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
 app.use(express.json());
@@ -10,10 +11,46 @@ const pool = new Pool({
   connectionString: process.env.PROFILE_DB_URL
 });
 
-// Helper temporal para obtener el user_id.
-// Más adelante esto saldrá del token JWT.
-function getUserIdFromRequest(req) {
-  return req.query.user_id || req.headers["x-user-id"];
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
+
+// Middleware de autenticación usando el access token real de Supabase
+async function requireAuth(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        status: "error",
+        message: "Missing or invalid Authorization header"
+      });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    const { data, error } = await supabase.auth.getUser(token);
+
+    if (error || !data?.user) {
+      return res.status(401).json({
+        status: "error",
+        message: "Invalid token"
+      });
+    }
+
+    req.user = {
+      id: data.user.id,
+      email: data.user.email || null
+    };
+
+    next();
+  } catch (error) {
+    return res.status(401).json({
+      status: "error",
+      message: "Authentication failed"
+    });
+  }
 }
 
 app.get("/health", async (req, res) => {
@@ -67,16 +104,9 @@ app.get("/", async (req, res) => {
 });
 
 // Endpoint principal del perfil actual
-app.get("/me", async (req, res) => {
+app.get("/me", requireAuth, async (req, res) => {
   try {
-    const userId = getUserIdFromRequest(req);
-
-    if (!userId) {
-      return res.status(400).json({
-        status: "error",
-        message: "user_id is required for now (query param or x-user-id header)"
-      });
-    }
+    const userId = req.user.id;
 
     const result = await pool.query(`
       SELECT
@@ -113,16 +143,9 @@ app.get("/me", async (req, res) => {
 });
 
 // Actualizar perfil actual
-app.put("/me", async (req, res) => {
+app.put("/me", requireAuth, async (req, res) => {
   try {
-    const userId = getUserIdFromRequest(req);
-
-    if (!userId) {
-      return res.status(400).json({
-        status: "error",
-        message: "user_id is required for now (query param or x-user-id header)"
-      });
-    }
+    const userId = req.user.id;
 
     const {
       first_name,
@@ -188,16 +211,9 @@ app.put("/me", async (req, res) => {
 });
 
 // Obtener direcciones del usuario actual
-app.get("/me/addresses", async (req, res) => {
+app.get("/me/addresses", requireAuth, async (req, res) => {
   try {
-    const userId = getUserIdFromRequest(req);
-
-    if (!userId) {
-      return res.status(400).json({
-        status: "error",
-        message: "user_id is required for now (query param or x-user-id header)"
-      });
-    }
+    const userId = req.user.id;
 
     const result = await pool.query(`
       SELECT
@@ -231,16 +247,9 @@ app.get("/me/addresses", async (req, res) => {
 });
 
 // Crear dirección para el usuario actual
-app.post("/me/addresses", async (req, res) => {
+app.post("/me/addresses", requireAuth, async (req, res) => {
   try {
-    const userId = getUserIdFromRequest(req);
-
-    if (!userId) {
-      return res.status(400).json({
-        status: "error",
-        message: "user_id is required for now (query param or x-user-id header)"
-      });
-    }
+    const userId = req.user.id;
 
     const {
       label,
@@ -319,18 +328,11 @@ app.post("/me/addresses", async (req, res) => {
 });
 
 // Actualizar una dirección del usuario actual
-app.put("/me/addresses/:addressId", async (req, res) => {
+app.put("/me/addresses/:addressId", requireAuth, async (req, res) => {
   try {
-    const userId = getUserIdFromRequest(req);
-
-    if (!userId) {
-      return res.status(400).json({
-        status: "error",
-        message: "user_id is required for now (query param or x-user-id header)"
-      });
-    }
-
+    const userId = req.user.id;
     const { addressId } = req.params;
+
     const {
       label,
       street_line_1,
@@ -415,17 +417,9 @@ app.put("/me/addresses/:addressId", async (req, res) => {
 });
 
 // Eliminar una dirección del usuario actual
-app.delete("/me/addresses/:addressId", async (req, res) => {
+app.delete("/me/addresses/:addressId", requireAuth, async (req, res) => {
   try {
-    const userId = getUserIdFromRequest(req);
-
-    if (!userId) {
-      return res.status(400).json({
-        status: "error",
-        message: "user_id is required for now (query param or x-user-id header)"
-      });
-    }
-
+    const userId = req.user.id;
     const { addressId } = req.params;
 
     const result = await pool.query(`
@@ -455,16 +449,9 @@ app.delete("/me/addresses/:addressId", async (req, res) => {
 });
 
 // Obtener badges del usuario actual
-app.get("/me/badges", async (req, res) => {
+app.get("/me/badges", requireAuth, async (req, res) => {
   try {
-    const userId = getUserIdFromRequest(req);
-
-    if (!userId) {
-      return res.status(400).json({
-        status: "error",
-        message: "user_id is required for now (query param or x-user-id header)"
-      });
-    }
+    const userId = req.user.id;
 
     const result = await pool.query(`
       SELECT
@@ -493,6 +480,7 @@ app.get("/me/badges", async (req, res) => {
   }
 });
 
+// Se mantiene porque Auth lo usa para crear el registro inicial en accounts
 // Temporal para pruebas directas por id
 app.get("/account/:accountId", async (req, res) => {
   try {
@@ -571,57 +559,83 @@ app.get("/:id", async (req, res) => {
 app.post("/new/user", async (req, res) => {
   try {
     const {
-      user_id, 
+      user_id,
       country,
-      first_name, 
-      last_name, 
+      first_name,
+      last_name,
       username,
-      avatar_url 
+      avatar_url
     } = req.body;
 
     if (!user_id || !first_name) {
       return res.status(400).json({
         status: "error",
-        message: "user_id, first_name are required"
+        message: "user_id and first_name are required"
       });
     }
 
-    const result = await pool.query(
-      `INSERT INTO accounts (
+    const result = await pool.query(`
+      INSERT INTO accounts (
         user_id,
-        country, 
-        first_name, 
-        last_name, 
-        username, 
+        country,
+        first_name,
+        last_name,
+        username,
         avatar_url
       )
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING
         account_id,
         user_id,
-        country, 
-        first_name, 
-        last_name, 
-        username, 
-        avatar_url
+        country,
+        first_name,
+        last_name,
+        username,
+        avatar_url,
+        created_at,
+        updated_at
     `, [
       user_id,
-      country, 
-      first_name, 
-      last_name, 
-      username, 
-      avatar_url
+      country ?? null,
+      first_name,
+      last_name ?? null,
+      username ?? null,
+      avatar_url ?? null
     ]);
 
     res.status(201).json({
       status: "success",
-      new_user: result.rows[0]}); 
-    } catch(error) {
-      res.status(500).json({
+      new_user: result.rows[0]
+    });
+  } catch (error) {
+    if (error.code === "23505") {
+      return res.status(409).json({
         status: "error",
-        error: error.message 
+        message: "User already exists"
       });
     }
+
+    res.status(500).json({
+      status: "error",
+      error: error.message
+    });
+  }
+});
+
+
+app.get("/debug/token", async (req, res) => {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: "tamtok2.0@gmail.com",
+    password: "Prueba1#"
+  });
+
+  if (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  res.json({
+    token: data.session.access_token
+  });
 });
 
 app.listen(PORT, () => {

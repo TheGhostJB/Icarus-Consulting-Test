@@ -1,11 +1,13 @@
-import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { Session } from "@supabase/supabase-js";
+import { InsertNewUserRequest } from "../types";
+import { insertNewUser } from "../services/profileService";
 
 //Auth default value type
 interface AuthContextType {
     session: Session | null;
-    signUpNewUser: (email: string, password: string) => Promise<any>;
+    signUpNewUser: (email: string, password: string, fullName: string) => Promise<any>;
     SignInUser: (email: string, password: string) => Promise<any>;
     SignInWithGoogle: () => Promise<any>;
     SignOut: () => Promise<any>;
@@ -19,6 +21,34 @@ interface AuthContextProps extends React.PropsWithChildren{
 
 export const AuthContextProvider = ( {children} : AuthContextProps ) => {
     const [session, setSession ] = useState<Session | null>(null);
+    const profileSyncedRef = useRef(false);
+
+    const buildProfilePayload = (s: Session): InsertNewUserRequest => {
+        const fullName = (s.user.user_metadata?.full_name || "").trim();
+        const [first_name, ...rest] = fullName.split(/\s+/).filter(Boolean);
+        const last_name = rest.join(" ");
+
+        return {
+        user_id: s.user.id,
+        country: "",
+        first_name: first_name || "User", // tu backend exige first_name
+        last_name: last_name || "",
+        username: s.user.email?.split("@")[0] || `user_${s.user.id.slice(0, 8)}`,
+        avatar_url: s.user.user_metadata?.avatar_url || ""
+        };
+    };
+
+     const syncProfileToOwnDb = async (s: Session) => {
+        try {
+        const payload = buildProfilePayload(s);
+        await insertNewUser(payload);
+        } catch (err: any) {
+        const msg = String(err?.message || "").toLowerCase();
+        // Si ya existe por user_id o username, no rompas login
+        if (msg.includes("duplicate") || msg.includes("already exists") || msg.includes("http error 409")) return;
+        console.error("Error creating profile in own DB", err);
+        }
+    };
 
     const authUnavailableResponse = {
         success: false,
@@ -26,7 +56,7 @@ export const AuthContextProvider = ( {children} : AuthContextProps ) => {
     };
 
     //Sign up
-    const signUpNewUser = async (email : string, password : string) => {
+    const signUpNewUser = async (email : string, password : string, fullName: string) => {
         if (!supabase) {
             return authUnavailableResponse;
         }
@@ -34,6 +64,11 @@ export const AuthContextProvider = ( {children} : AuthContextProps ) => {
         const { data, error } = await supabase.auth.signUp({
             email: email,
             password: password,
+            options: {
+                data: {
+                    full_name: fullName,
+                },
+            },
         });
 
         if (error) {
@@ -76,6 +111,7 @@ export const AuthContextProvider = ( {children} : AuthContextProps ) => {
     }
 
     const SignInWithGoogle = async () => {
+
         const {data, error} = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
@@ -98,16 +134,27 @@ export const AuthContextProvider = ( {children} : AuthContextProps ) => {
         return {
             success: true,
             data
-        }
-    }
+        };
+    };
 
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: {session}}) => {
+        supabase.auth.getSession().then(async ({ data: {session}}) => {
             setSession(session);
+            if (session && !profileSyncedRef.current) {
+                profileSyncedRef.current = true;
+                await syncProfileToOwnDb(session);
+            }
         });
 
-        const {data: {subscription}} = supabase.auth.onAuthStateChange((_event, session) => {
+        const {data: {subscription}} = supabase.auth.onAuthStateChange(async (_event, session) => {
             setSession(session);
+            if (session && !profileSyncedRef.current) {
+                profileSyncedRef.current = true;
+                await syncProfileToOwnDb(session);
+            }
+            if (!session) {
+                profileSyncedRef.current = false;
+            }
         });
 
         return () => {

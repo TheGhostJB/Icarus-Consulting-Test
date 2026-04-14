@@ -3,8 +3,7 @@
 import React, { useState } from "react";
 import { Auth } from "../../context/AuthContext";
 import { Button, FieldError, Form, Input, Label, TextField } from "@heroui/react";
-import { insertNewUser } from "../../services/profileService";
-import { InsertNewUserRequest } from "../../types";
+import { SigninWithGoogle } from "./SigninGoogle";
 
 interface SignUpProps {
     onSuccess: () => void;
@@ -28,30 +27,10 @@ export const SignupForm = ({ onSuccess, onSwitchToSignIn }: SignUpProps) => {
         setMessage(null);
 
         try {
-            const supabaseAuthRes = await signUpNewUser(email, password);
+            const supabaseAuthRes = await signUpNewUser(email, password, name);
 
             if (!supabaseAuthRes.success) {
                 setError(supabaseAuthRes.error ?? `An unexpected error occurred during signup ${error}`);
-                return;
-            }
-
-            const [first_name, ...lastNameParts] = name.trim().split(/\s+/);
-            const last_name = lastNameParts.join(" ");
-
-            const payload: InsertNewUserRequest = {
-                user_id: supabaseAuthRes.user.user.id,
-                country: "",
-                first_name,
-                last_name,
-                username: email.split('@')[0],
-                avatar_url: ""
-            };
-            console.log(`user_id: ${supabaseAuthRes.user.user.id} \nFirst name: ${first_name} \nLast name: ${last_name}`)
-
-            const profileRes = await insertNewUser(payload);
-
-            if (!profileRes.new_user) {
-                setError("An unexpected error occurred during signup  within our postgres");
                 return;
             }
 
@@ -156,6 +135,14 @@ export const SignupForm = ({ onSuccess, onSwitchToSignIn }: SignUpProps) => {
             {message && (
                 <p className="mt-3 text-center text-sm text-emerald-700">{message}</p>
             )}
+            <div className="flex flex-col items-center gap-2 w-full mt-4">
+                <span className="h-px flex-1 bg-slate-300" />
+                <p className="m-0 whitespace-nowrap text-sm tracking-[0.08em] text-slate-500">
+                    OR REGISTER WITH
+                </p>
+                <span className="h-px flex-1 bg-slate-300" />
+                <SigninWithGoogle />
+            </div>
             <div className="flex items-center gap-4 mt-4">
                 <span className="h-px flex-1 bg-slate-300" />
                 <p className="mt-2 text-[16px] leading-6 text-[#5B6475]">Already have one? {" "} 

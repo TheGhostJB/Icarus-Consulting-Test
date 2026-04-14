@@ -1,31 +1,33 @@
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import Navbar from "../components/layout/Navbar";
 import UnityGameCard from "../components/unity/UnityGameCard";
 import WordleGame from "../components/wordle/WordleGame";
-import "../styles/unity.css";
 
 const UNITY_BUILD_REVISION = "2026-03-12-bridge-fix-2";
+const TAB_BUTTON_BASE_CLASS =
+  "cursor-pointer rounded-full border border-[#b7c4d1] bg-white px-5 py-3 text-sm font-bold text-[#28415a]";
+const TAB_BUTTON_ACTIVE_CLASS = "border-[#0f3d78] bg-[#0f3d78] text-white";
 
 function OffSeasonPage() {
   const [activeTab, setActiveTab] = useState<"unity" | "wordle">("unity");
 
   return (
-    <div style={styles.page}>
-      <main style={styles.container}>
+    <div className="min-h-screen bg-[#F4F5F7]">
+      <main className="mx-auto w-full max-w-[1400px] p-6">
         <Navbar />
 
-        <section style={styles.hero}>
-          <h1 style={styles.title}>OFFSEASON</h1>
+        <section className="mb-9 flex flex-wrap items-start justify-between gap-6 rounded-[28px] bg-[linear-gradient(90deg,#0B2A55_0%,#1D4E89_50%,#60A5FA_100%)] px-10 py-[42px] text-white shadow-[0_10px_24px_rgba(0,0,0,0.12)]">
+          <h1 className="m-0 text-[58px] leading-[1.05] font-black">OFFSEASON</h1>
         </section>
 
-        <section className="offseason-tabs-shell">
-          <div className="offseason-tabs-nav" role="tablist" aria-label="Offseason games">
+        <section className="grid gap-5">
+          <div className="flex flex-wrap gap-3" role="tablist" aria-label="Offseason games">
             <button
               type="button"
               role="tab"
               aria-selected={activeTab === "unity"}
-              className={`offseason-tab-button ${
-                activeTab === "unity" ? "offseason-tab-button-active" : ""
+              className={`${TAB_BUTTON_BASE_CLASS} ${
+                activeTab === "unity" ? TAB_BUTTON_ACTIVE_CLASS : ""
               }`}
               onClick={() => setActiveTab("unity")}
             >
@@ -35,8 +37,8 @@ function OffSeasonPage() {
               type="button"
               role="tab"
               aria-selected={activeTab === "wordle"}
-              className={`offseason-tab-button ${
-                activeTab === "wordle" ? "offseason-tab-button-active" : ""
+              className={`${TAB_BUTTON_BASE_CLASS} ${
+                activeTab === "wordle" ? TAB_BUTTON_ACTIVE_CLASS : ""
               }`}
               onClick={() => setActiveTab("wordle")}
             >
@@ -44,7 +46,7 @@ function OffSeasonPage() {
             </button>
           </div>
 
-          <div className="offseason-tab-panel" role="tabpanel">
+          <div role="tabpanel">
             {activeTab === "unity" ? (
               <UnityGameCard
                 unityConfig={{
@@ -63,36 +65,5 @@ function OffSeasonPage() {
     </div>
   );
 }
-
-const styles: Record<string, CSSProperties> = {
-  page: {
-    minHeight: "100vh",
-    backgroundColor: "#F4F5F7",
-  },
-  container: {
-    maxWidth: "1400px",
-    margin: "0 auto",
-    padding: "24px",
-  },
-  hero: {
-    background: "linear-gradient(90deg, #0B2A55 0%, #1D4E89 50%, #60A5FA 100%)",
-    borderRadius: "28px",
-    padding: "42px 40px",
-    color: "white",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "24px",
-    flexWrap: "wrap",
-    boxShadow: "0 10px 24px rgba(0,0,0,0.12)",
-    marginBottom: "36px",
-  },
-  title: {
-    margin: 0,
-    fontSize: "58px",
-    fontWeight: 900,
-    lineHeight: 1.05,
-  },
-};
 
 export default OffSeasonPage;

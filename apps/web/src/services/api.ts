@@ -1,10 +1,14 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
-export async function apiFetch<T = unknown>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
+function resolveApiUrl(endpoint: string): string {
+  if (API_BASE_URL && endpoint.startsWith("/api/")) {
+    return `${API_BASE_URL}${endpoint.slice(4)}`;
+  }
+  return `${API_BASE_URL}${endpoint}`;
+}
 
-  console.log("API_BASE_URL:", API_BASE_URL);
-  console.log("Fetching URL:", url);
+export async function apiFetch<T = unknown>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const url = resolveApiUrl(endpoint);
 
   const config: RequestInit = {
     ...options,

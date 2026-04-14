@@ -494,6 +494,43 @@ app.get("/me/badges", async (req, res) => {
 });
 
 // Temporal para pruebas directas por id
+app.get("/account/:accountId", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        account_id,
+        user_id,
+        first_name,
+        last_name,
+        username,
+        country,
+        avatar_url,
+        created_at,
+        updated_at
+      FROM accounts
+      WHERE account_id = $1
+    `, [req.params.accountId]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        status: "error",
+        message: "Profile not found"
+      });
+    }
+
+    res.json({
+      status: "success",
+      profile: result.rows[0]
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      error: error.message
+    });
+  }
+});
+
+// Temporal para pruebas directas por id
 app.get("/:id", async (req, res) => {
   try {
     const result = await pool.query(`
@@ -528,6 +565,63 @@ app.get("/:id", async (req, res) => {
       error: error.message
     });
   }
+});
+
+//
+app.post("/new/user", async (req, res) => {
+  try {
+    const {
+      user_id, 
+      country,
+      first_name, 
+      last_name, 
+      username,
+      avatar_url 
+    } = req.body;
+
+    if (!user_id || !first_name) {
+      return res.status(400).json({
+        status: "error",
+        message: "user_id, first_name are required"
+      });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO accounts (
+        user_id,
+        country, 
+        first_name, 
+        last_name, 
+        username, 
+        avatar_url
+      )
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING
+        account_id,
+        user_id,
+        country, 
+        first_name, 
+        last_name, 
+        username, 
+        avatar_url
+    `, [
+      user_id,
+      country, 
+      first_name, 
+      last_name, 
+      username, 
+      avatar_url
+    ]);
+
+    res.status(201).json({
+      status: "success",
+      new_user: result.rows[0]}); 
+    } catch(error) {
+      res.status(500).json({
+        status: "error",
+        error: error.message 
+      });
+    }
 });
 
 app.listen(PORT, () => {

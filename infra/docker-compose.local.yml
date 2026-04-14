@@ -2,10 +2,12 @@ services:
   matches-service:
     environment:
       MATCHES_DB_URL: postgresql://matches_svc:MatchesSvc_2026_dev@host.docker.internal:15432/matches_db
+      DEMO_MATCH_IDS: "2"
 
   rooms-service:
     environment:
       ROOMS_DB_URL: postgresql://rooms_svc:RoomsSvc_2026_dev@host.docker.internal:15432/rooms_db
+      ROOMS_CHAT_PRUNE_INTERVAL_MS: "120000"
 
   analytics-service:
     environment:
@@ -29,3 +31,7 @@ services:
   history-service:
     environment:
       HISTORY_DB_URL: postgresql://history_svc:postgres@host.docker.internal:15432/history_db
+
+  offseason-service:
+    environment:
+      OFFSEASON_DB_URL: postgresql://offseason_svc:OffseasonSvc_2026_dev@host.docker.internal:15432/offseason_db

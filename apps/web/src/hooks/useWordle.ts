@@ -1,10 +1,8 @@
-import { useCallback, useMemo, useState } from "react";
-import { wordleGeneralWords } from "../data/wordleGeneralWords";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { wordleWords } from "../data/wordleWords";
 
 const MAX_ATTEMPTS = 6;
 const WORD_LENGTH = 5;
-const allowedGuessWords = new Set([...wordleGeneralWords, ...wordleWords]);
 
 export type WordleTileStatus = "empty" | "absent" | "present" | "correct";
 export type WordleGameStatus = "playing" | "won" | "lost";
@@ -17,6 +15,16 @@ export interface WordleTile {
 export type WordleBoard = WordleTile[][];
 export type WordleKeyboardStatus = Record<string, WordleTileStatus>;
 
+interface UseWordleOptions {
+  puzzleDate?: string;
+  onGameFinished?: (payload: {
+    attemptCount: number;
+    gameStatus: Exclude<WordleGameStatus, "playing">;
+    puzzleDate: string;
+    targetWord: string;
+  }) => void;
+}
+
 function emptyTile(): WordleTile {
   return { letter: "", status: "empty" };
 }
@@ -27,8 +35,19 @@ function buildEmptyBoard(): WordleBoard {
   );
 }
 
-function pickRandomWord(): string {
-  const index = Math.floor(Math.random() * wordleWords.length);
+function resolvePuzzleDate(puzzleDate?: string): string {
+  return puzzleDate || new Date().toISOString().slice(0, 10);
+}
+
+function pickDailyWord(puzzleDate?: string): string {
+  const seed = resolvePuzzleDate(puzzleDate);
+  let hash = 0;
+
+  for (const character of seed) {
+    hash = (hash * 31 + character.charCodeAt(0)) % wordleWords.length;
+  }
+
+  const index = Math.abs(hash) % wordleWords.length;
   return wordleWords[index];
 }
 
@@ -71,13 +90,24 @@ function evaluateGuess(guess: string, targetWord: string): WordleTile[] {
   return row;
 }
 
-export function useWordle() {
-  const [targetWord, setTargetWord] = useState<string>(() => pickRandomWord());
+export function useWordle(options: UseWordleOptions = {}) {
+  const onGameFinished = options.onGameFinished;
+  const activePuzzleDate = resolvePuzzleDate(options.puzzleDate);
+  const [targetWord, setTargetWord] = useState<string>(() => pickDailyWord(activePuzzleDate));
   const [currentGuess, setCurrentGuess] = useState("");
   const [board, setBoard] = useState<WordleBoard>(() => buildEmptyBoard());
   const [attempt, setAttempt] = useState(0);
   const [gameStatus, setGameStatus] = useState<WordleGameStatus>("playing");
   const [message, setMessage] = useState("Adivina la palabra de 5 letras");
+
+  useEffect(() => {
+    setTargetWord(pickDailyWord(activePuzzleDate));
+    setCurrentGuess("");
+    setBoard(buildEmptyBoard());
+    setAttempt(0);
+    setGameStatus("playing");
+    setMessage("Adivina la palabra de 5 letras");
+  }, [activePuzzleDate]);
 
   const keyboardStatus = useMemo<WordleKeyboardStatus>(() => {
     const map: WordleKeyboardStatus = {};
@@ -115,11 +145,6 @@ export function useWordle() {
           return;
         }
 
-        if (!allowedGuessWords.has(currentGuess)) {
-          setMessage("Palabra no permitida en este prototipo");
-          return;
-        }
-
         const evaluatedRow = evaluateGuess(currentGuess, targetWord);
 
         setBoard((previous) => {
@@ -128,21 +153,35 @@ export function useWordle() {
           return next;
         });
 
+        const completedAttemptCount = attempt + 1;
+
         if (currentGuess === targetWord) {
           setGameStatus("won");
           setMessage("Ganaste. Excelente jugada.");
+          onGameFinished?.({
+            attemptCount: completedAttemptCount,
+            gameStatus: "won",
+            puzzleDate: activePuzzleDate,
+            targetWord,
+          });
           return;
         }
 
         if (attempt + 1 >= MAX_ATTEMPTS) {
           setGameStatus("lost");
           setMessage(`Perdiste. La palabra era ${targetWord}.`);
+          onGameFinished?.({
+            attemptCount: completedAttemptCount,
+            gameStatus: "lost",
+            puzzleDate: activePuzzleDate,
+            targetWord,
+          });
           return;
         }
 
         setAttempt((previous) => previous + 1);
         setCurrentGuess("");
-        setMessage("Sigue intentando");
+        setMessage("Palabra incorrecta");
         return;
       }
 
@@ -159,17 +198,17 @@ export function useWordle() {
       });
       setMessage("");
     },
-    [attempt, currentGuess, gameStatus, targetWord],
+    [activePuzzleDate, attempt, currentGuess, gameStatus, onGameFinished, targetWord],
   );
 
   const resetGame = useCallback(() => {
-    setTargetWord(pickRandomWord());
+    setTargetWord(pickDailyWord(activePuzzleDate));
     setCurrentGuess("");
     setBoard(buildEmptyBoard());
     setAttempt(0);
     setGameStatus("playing");
     setMessage("Nueva partida iniciada");
-  }, []);
+  }, [activePuzzleDate]);
 
   const visibleBoard = useMemo(() => {
     return board.map((row, rowIndex) => {
@@ -195,6 +234,7 @@ export function useWordle() {
     keyboardStatus,
     maxAttempts: MAX_ATTEMPTS,
     message,
+    puzzleDate: activePuzzleDate,
     resetGame,
     targetWord,
   };

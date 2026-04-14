@@ -527,16 +527,16 @@ function UnityGameEmbed({
   }, [loaderUrl, dataUrl, frameworkUrl, codeUrl]);
 
   return (
-    <div className="unity-embed">
-      <div className="unity-toolbar">
-        <div>
-          <p className="unity-toolbar-title">{getControlStatusLabel()}</p>
+    <div className="grid gap-4">
+      <div className="flex items-start justify-between gap-4 rounded-[18px] border border-[#d8dee5] bg-[#f5f8fb] p-4 max-[900px]:flex-col">
+        <div className="grid gap-0.5">
+          <p className="mb-1.5 font-bold text-[#0b2a55]">{getControlStatusLabel()}</p>
         </div>
 
-        <div className="unity-toolbar-actions">
+        <div className="flex flex-wrap gap-2.5">
           <button
             type="button"
-            className="unity-primary-button"
+            className="cursor-pointer rounded-full border-0 bg-[#0f3d78] px-[18px] py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
             onClick={() => void connectJoyCon()}
             disabled={!hasWebHid}
           >
@@ -544,7 +544,7 @@ function UnityGameEmbed({
           </button>
           <button
             type="button"
-            className="unity-secondary-button"
+            className="cursor-pointer rounded-full border border-[#b7c4d1] bg-white px-[18px] py-3 text-sm font-bold text-[#28415a]"
             onClick={() => void disconnectJoyCon()}
           >
             Desconectar
@@ -552,14 +552,14 @@ function UnityGameEmbed({
         </div>
       </div>
 
-      <div className="unity-canvas-shell">
+      <div className="relative min-h-[560px] overflow-hidden rounded-[22px] bg-[radial-gradient(circle_at_top,rgba(214,40,57,0.2),transparent_24%),linear-gradient(180deg,#07162d_0%,#050b15_100%)] max-[900px]:min-h-[420px]">
         {!isUnityLoaded ? (
-          <div className="unity-loading-overlay">
-            <div className="unity-loading-box">
-              <p>{unityStatus}</p>
-              <div className="unity-loading-track">
+          <div className="absolute inset-0 z-[2] flex items-center justify-center bg-[rgba(5,11,21,0.78)] backdrop-blur-[6px]">
+            <div className="w-[min(360px,calc(100%-40px))] text-white">
+              <p className="mb-3 text-center font-bold">{unityStatus}</p>
+              <div className="h-3 w-full overflow-hidden rounded-full bg-[rgba(255,255,255,0.15)]">
                 <div
-                  className="unity-loading-fill"
+                  className="h-full rounded-full bg-[linear-gradient(90deg,#d62839_0%,#ff9e5e_100%)] transition-[width] duration-180 ease-in-out"
                   style={{ width: `${Math.round(loadingProgress * 100)}%` }}
                 />
               </div>
@@ -570,7 +570,7 @@ function UnityGameEmbed({
         <canvas
           ref={canvasRef}
           id="unity-canvas"
-          className="unity-canvas"
+          className="block min-h-[560px] w-full border-0 max-[900px]:min-h-[420px]"
           width="960"
           height="600"
           tabIndex={-1}

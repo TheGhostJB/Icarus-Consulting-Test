@@ -11,7 +11,9 @@ services:
       - profile-service
       - analytics-service
       - store-service
+      - cards-service
       - history-service
+      - offseason-service
       - tweets-service
       - news-service
     networks:
@@ -80,6 +82,10 @@ services:
     environment:
       PORT: 4006
       PROFILE_DB_URL: postgresql://profile_svc:ProfileSvc_2026_dev@supabase-db:5432/profile_db
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+    ports:
+      - "4006:4006"
     networks:
       - supabase_net
 
@@ -95,6 +101,18 @@ services:
     networks:
       - supabase_net
 
+  offseason-service:
+    build:
+      context: ../services/offseason-service
+    container_name: icarus-offseason
+    environment:
+      PORT: 4010
+      OFFSEASON_DB_URL: postgresql://offseason_svc:OffseasonSvc_2026_dev@supabase-db-do4ksgcc0wksg4wwg4osgk0o:5432/offseason_db
+    ports:
+      - "4010:4010"
+    networks:
+      - supabase_net
+
   tweets-service:
     build:
       context: ../services/tweets-service
@@ -102,6 +120,16 @@ services:
     environment:
       PORT: 4007
       GETXAPI_KEY: ${GETXAPI_KEY}
+    networks:
+      - supabase_net
+
+  cards-service:
+    build:
+      context: ../services/cards-service
+    container_name: icarus-cards
+    environment:
+      PORT: 4009
+      CARDS_DB_URL: postgresql://cards_svc:CardsSvc_2026_dev@supabase-db-do4ksgcc0wksg4wwg4osgk0o:5432/cards_db
     networks:
       - supabase_net
 

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Auth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
 import { Button, FieldError, Form, Input, Label, TextField } from "@heroui/react";
 import { SigninWithGoogle } from "./SigninGoogle";
 
@@ -9,47 +8,67 @@ interface SignInProps {
     onSwitchToSignUp: () => void;
 }
 
+interface AuthFormShellProps {
+    title: string;
+    description: string;
+    children: React.ReactNode;
+}
+
+const AuthFormShell = ({ title, description, children }: AuthFormShellProps) => (
+    <div className="p-4">
+        <div className="mb-6">
+            <h1 className="text-[28px] font-bold leading-tight text-[#0B2A4A]">{title}</h1>
+            <p className="mt-2 text-[16px] leading-6 text-[#5B6475]">{description}</p>
+        </div>
+        {children}
+    </div>
+);
+
+const AuthDivider = ({ label }: { label: string }) => (
+    <div className="flex w-full items-center gap-4">
+        <span className="h-px flex-1 bg-slate-300" />
+        <p className="m-0 whitespace-nowrap text-sm tracking-[0.08em] text-slate-500">{label}</p>
+        <span className="h-px flex-1 bg-slate-300" />
+    </div>
+);
+
 export const SigninWithEmailForm = ({onSuccess,onSwitchToSignUp}: SignInProps) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
-    const { session, SignInUser } = Auth();
-    const navigate = useNavigate();
-
-    console.log("Session is -> ", session);
+    const [loading, setLoading] = useState(false);
+    const { SignInUser } = Auth();
 
     const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setLoading(true);
         setError(null);
 
         try {
             const result = await SignInUser(email, password);
     
             if (!result.success) {
-                setError(result.error ?? `An unexpected error occurred during signup ${error}`);
+                setError(result.error ?? `An unexpected error occurred during sign in ${error}`);
                 return;
             }
 
-            console.log(result.message);
+            onSuccess();
         } catch(error) {
             console.error("Error signing up outside context ", error);
+            setError("An unexpected error occurred during sign in.");
         } finally {
-            onSuccess();
+            setLoading(false);
         }
 
     };
-    //TODO: Implement Modal general component and forms for more structure, 
-    // Sign in looks better, check docs and fix it
+
     return (
-        <>
-            <div className="p-4">
-                <div className="mb-6 flex flex-row">
-                    <div>
-                        <h1 className="text-[28px] font-bold leading-tight text-[#0B2A4A]">Welcome Back</h1>{/* CHECAR SOLORES DE LA PALETA */}
-                        <p className="mt-2 text-[16px] leading-6 text-[#5B6475]">Log in to your Titans Crew account</p>
-                    </div>
-                </div>
-                <Form className="flex w-full max-w-md flex-col gap-4" onSubmit={handleSignIn}>
+        <AuthFormShell
+            title="Welcome Back"
+            description="Log in to your Titans Crew account"
+        >
+            <Form className="flex w-full max-w-md flex-col gap-4" onSubmit={handleSignIn}>
+                <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                     <TextField
                         isRequired
                         name="email"
@@ -89,33 +108,35 @@ export const SigninWithEmailForm = ({onSuccess,onSwitchToSignUp}: SignInProps) =
                         <Input placeholder="Enter your password" />
                         <FieldError />
                     </TextField>
+                </div>
+
+                <div className="flex flex-col gap-3">
                     {error && (
-                    <p className="text-sm text-red-600 text-center">
-                        {error}
-                    </p>
+                        <p className="text-center text-sm text-red-600">
+                            {error}
+                        </p>
                     )}
-                    <div className="max-w">
-                        <Button type="submit" className="mt-4 h-14 w-full rounded-2xl bg-slate-800">
-                        Sign In
-                        </Button>
-                    </div>
-                    <div className="flex items-center gap-4 w-full">
-                        <span className="h-px flex-1 bg-slate-300" />
-                        <p className="m-0 whitespace-nowrap text-sm tracking-[0.08em] text-slate-500">
-                            OR CONTINUE WITH
-                        </p>
-                        <span className="h-px flex-1 bg-slate-300" />
-                    </div>
-                    <div className="flex flex-col items-center gap-4">   
-                        <SigninWithGoogle />
-                        <p className="mt-2 text-[16px] leading-6 text-[#5B6475]">Don´t have an account? {" "} 
-                            <button onClick={onSwitchToSignUp} className="hover: cursor-pointer">
-                                <span className="font-semibold text-slate-900"> Sign Up</span>
-                            </button>
-                        </p>
-                    </div>
-                </Form>
-            </div>
-        </>
+                    <Button
+                        isDisabled={loading || !email || !password}
+                        type="submit"
+                        className="h-14 w-full rounded-2xl bg-slate-800"
+                    >
+                        {loading ? "Signing In..." : "Sign In"}
+                    </Button>
+                </div>
+
+                <AuthDivider label="OR CONTINUE WITH" />
+
+                <div className="flex flex-col items-center gap-4">
+                    <SigninWithGoogle />
+                    <p className="mt-2 text-[16px] leading-6 text-[#5B6475]">
+                        Don&apos;t have an account?{" "}
+                        <button type="button" onClick={onSwitchToSignUp} className="hover:cursor-pointer">
+                            <span className="font-semibold text-slate-900">Sign Up</span>
+                        </button>
+                    </p>
+                </div>
+            </Form>
+        </AuthFormShell>
     );
 };

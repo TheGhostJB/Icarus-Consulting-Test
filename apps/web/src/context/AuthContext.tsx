@@ -119,7 +119,7 @@ export const AuthContextProvider = ( {children} : AuthContextProps ) => {
                     access_type: 'offline',
                     prompt: 'consent',
                 },
-                redirectTo: 'http://localhost:5173'
+                redirectTo: window.location.origin
             } 
         });
 

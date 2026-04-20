@@ -12,6 +12,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     // @tailwindcss/vite resuelve @import con condición "style" y falla con el exports de @heroui/styles
+    base: env.VITE_BASE_PATH || "/",
     resolve: {
       alias: {
         "@heroui/styles/css": path.resolve(
